@@ -5,6 +5,7 @@
 
 library(visNetwork)
 library(igraph)
+library(r2d3)
 
 # create network and visualize the 3 groups
 nodes = data.frame(id = 1:10,
@@ -46,5 +47,20 @@ ARD = data.frame(rbind(node1 = c(2, 0, 1),
 colnames(ARD) = c("A", "B", "C")
 
 ARD
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
