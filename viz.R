@@ -6,6 +6,7 @@
 library(visNetwork)
 library(igraph)
 library(r2d3)
+library(kableExtra)
 
 # create network and visualize the 3 groups
 nodes = data.frame(id = 1:10,
@@ -48,15 +49,12 @@ colnames(ARD) = c("A", "B", "C")
 
 ARD
 
-
-
-
-
-
-
-
-
-
+ARD %>%
+  kbl(caption="How Many Do You Know in Each Group?",
+      format= "latex",
+      col.names = c("A","B","C"),
+      align="r") %>%
+  kable_classic(full_width = F, html_font = "helvetica")
 
 
 

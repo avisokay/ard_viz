@@ -17,27 +17,24 @@ library(kableExtra)
 
 ABSTRACT. Collecting complete network data is expensive, time-consuming, and often infeasible. Aggregated Relational Data (ARD), which capture information about a social network by asking a respondent questions of the form ``How many people with trait X do you know?'' provide a low-cost option when collecting complete network data is not possible. Rather than asking about connections between each pair of individuals directly, ARD collects the number of contacts the respondent knows with a given trait. Despite widespread use and a growing literature on ARD methodology, there is still no systematic understanding of when and why ARD should accurately recover features of the unobserved network. This paper provides such a characterization by deriving conditions under which statistics about the unobserved network (or functions of these statistics like regression coefficients) can be consistently estimated using ARD. We do this by first providing consistent estimates of network model parameters for three commonly used probabilistic models: the beta-model with node-specific unobserved effects, the stochastic block model with unobserved community structure, and latent geometric space models with unobserved latent locations. A key observation behind these results is that cross-group link probabilities for a collection of (possibly unobserved) groups identifies the model parameters, meaning ARD is sufficient for parameter estimation. With these estimated parameters, it is possible to simulate graphs from the fitted distribution and analyze the distribution of network statistics. We can then characterize conditions under which the simulated networks based on ARD will allow for consistent estimation of the unobserved network statistics, such as eigenvector centrality or response functions by or of the unobserved network, such as regression coefficients.
 
-Suppose that this is the unobserved network of interest: comprised of 10 nodes, each belonging to one of 3 distinct groups A, B or C. 
+Suppose that this is the unobserved network of interes: comprised of 10 nodes, each belonging to one of 3 distinct groups A, B or C. 
 
 ```{r, echo=FALSE}
 # create network and visualize the 3 groups
 nodes = data.frame(id = 1:10,
-                   shape = "circle",
-                   font.size = 30,
-                   align = "center",
-                   label = as.character(1:10),
-                   group = c(rep("Grey", 3), 
-                             rep("Red", 3), 
-                             rep("Gold", 4)),
+                   shape = "dot",
+                   label = paste("Node", 1:10),
+                   group = c(rep("A", 3), 
+                             rep("B", 3), 
+                             rep("C", 4)),
                    borderWidth = 2,
                    color.background = c(rep("slategrey", 3), 
                                         rep("tomato", 3), 
                                         rep("gold", 4)),
                    color.border = "black",
                    color.highlight.background = "green", 
-                   color.highlight.border = "black",
-                   shadow = TRUE
-                   # title = paste0("</b>Node </p>", 1:10)
+                   color.highlight.border = "darkgreen",
+                   title = paste0("</b>Node </p>", 1:10)
                    )
 ```
 
@@ -56,35 +53,52 @@ visNetwork(nodes, edges, width = "100%") %>%
 
 ```{r, echo=FALSE}
 # ARD matrix
-ARD = data.frame(rbind(node1knows = c(2, 0, 1),
-                       node2knows = c(2, 0, 0),
-                       node3knows = c(2, 1, 1),
-                       node4knows = c(0, 2, 0),
-                       node5knows = c(1, 2, 0),
-                       node6knows = c(0, 2, 1),
-                       node7knows = c(0, 1, 2),
-                       node8knows = c(0, 0, 3),
-                       node9knows = c(1, 0, 2),
-                       node10knows = c(0, 1, 3)))
-colnames(ARD) = c("Grey", "Red", "Gold")
-```
-
-```{r, echo=FALSE}
-ARD %>%
-  kbl(caption="How Many Do You Know in Each Group?",
-      format= "html",
-      col.names = c("Grey","Red","Gold"),
-      align="r") %>%
-  kable_classic(full_width = F, html_font = "helvetica")
+ARD = data.frame(rbind(node1 = c(2, 0, 1),
+                       node2 = c(2, 0, 0),
+                       node3 = c(2, 1, 1),
+                       node4 = c(0, 2, 0),
+                       node5 = c(1, 1, 0),
+                       node6 = c(0, 2, 1),
+                       node7 = c(0, 1, 2),
+                       node8 = c(0, 0, 3),
+                       node9 = c(1, 0, 2),
+                       node10 = c(0, 1, 3)))
+colnames(ARD) = c("A", "B", "C")
 ```
 
 
 
+```{=latex}
+\begin{table}
 
-
-
-
-
-
+\caption{How Many Do You Know in Each Group?}
+\centering
+\begin{tabular}[t]{l|r|r|r}
+\hline
+  & A & B & C\\
+\hline
+node1 & 2 & 0 & 1\\
+\hline
+node2 & 2 & 0 & 0\\
+\hline
+node3 & 2 & 1 & 1\\
+\hline
+node4 & 0 & 2 & 0\\
+\hline
+node5 & 1 & 1 & 0\\
+\hline
+node6 & 0 & 2 & 1\\
+\hline
+node7 & 0 & 1 & 2\\
+\hline
+node8 & 0 & 0 & 3\\
+\hline
+node9 & 1 & 0 & 2\\
+\hline
+node10 & 0 & 1 & 3\\
+\hline
+\end{tabular}
+\end{table}
+```
 
 
