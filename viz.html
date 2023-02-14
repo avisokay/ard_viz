@@ -5922,8 +5922,8 @@ response functions by or of the unobserved network, such as regression
 coefficients.</p>
 <p>Suppose that this is the unobserved network of interest: comprised of
 10 nodes, each belonging to one of 3 distinct groups A, B or C.</p>
-<div id="htmlwidget-84853b39c624fae8a554" style="width:100%;height:480px;" class="visNetwork html-widget"></div>
-<script type="application/json" data-for="htmlwidget-84853b39c624fae8a554">{"x":{"nodes":{"id":[1,2,3,4,5,6,7,8,9,10],"shape":["circle","circle","circle","circle","circle","circle","circle","circle","circle","circle"],"font.size":[30,30,30,30,30,30,30,30,30,30],"align":["center","center","center","center","center","center","center","center","center","center"],"label":["1","2","3","4","5","6","7","8","9","10"],"group":["Grey","Grey","Grey","Red","Red","Red","Gold","Gold","Gold","Gold"],"borderWidth":[2,2,2,2,2,2,2,2,2,2],"color.background":["slategrey","slategrey","slategrey","tomato","tomato","tomato","gold","gold","gold","gold"],"color.border":["black","black","black","black","black","black","black","black","black","black"],"color.highlight.background":["green","green","green","green","green","green","green","green","green","green"],"color.highlight.border":["black","black","black","black","black","black","black","black","black","black"],"shadow":[true,true,true,true,true,true,true,true,true,true]},"edges":{"from":[1,1,2,3,4,4,5,6,7,8,8,9,9,10,10],"to":[2,3,3,5,5,6,6,7,8,9,10,10,1,7,3],"color":["black","black","black","black","black","black","black","black","black","black","black","black","black","black","black"]},"nodesToDataframe":true,"edgesToDataframe":true,"options":{"width":"100%","height":"100%","nodes":{"shape":"dot"},"manipulation":{"enabled":false}},"groups":["Grey","Red","Gold"],"width":"100%","height":null,"idselection":{"enabled":false,"style":"width: 150px; height: 26px","useLabels":true,"main":"Select by id"},"byselection":{"enabled":true,"style":"width: 150px; height: 26px","multiple":false,"hideColor":"rgba(200,200,200,0.5)","highlight":false,"variable":"group","main":"Select by group","values":["Gold","Grey","Red"]},"main":null,"submain":null,"footer":null,"background":"rgba(0, 0, 0, 0)","highlight":{"enabled":false,"hoverNearest":false,"degree":1,"algorithm":"all","hideColor":"rgba(200,200,200,0.5)","labelOnly":true},"collapse":{"enabled":false,"fit":false,"resetHighlight":true,"clusterOptions":null,"keepCoord":true,"labelSuffix":"(cluster)"}},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-b9a1f648a93d4658c6ef" style="width:100%;height:480px;" class="visNetwork html-widget"></div>
+<script type="application/json" data-for="htmlwidget-b9a1f648a93d4658c6ef">{"x":{"nodes":{"id":[1,2,3,4,5,6,7,8,9,10],"shape":["circle","circle","circle","circle","circle","circle","circle","circle","circle","circle"],"font.size":[30,30,30,30,30,30,30,30,30,30],"align":["center","center","center","center","center","center","center","center","center","center"],"label":["1","2","3","4","5","6","7","8","9","10"],"group":["Grey","Grey","Grey","Red","Red","Red","Gold","Gold","Gold","Gold"],"borderWidth":[2,2,2,2,2,2,2,2,2,2],"color.background":["slategrey","slategrey","slategrey","tomato","tomato","tomato","gold","gold","gold","gold"],"color.border":["black","black","black","black","black","black","black","black","black","black"],"color.highlight.background":["green","green","green","green","green","green","green","green","green","green"],"color.highlight.border":["black","black","black","black","black","black","black","black","black","black"],"shadow":[true,true,true,true,true,true,true,true,true,true]},"edges":{"from":[1,1,2,3,4,4,5,6,7,8,8,9,9,10,10],"to":[2,3,3,5,5,6,6,7,8,9,10,10,1,7,3],"color":["black","black","black","black","black","black","black","black","black","black","black","black","black","black","black"]},"nodesToDataframe":true,"edgesToDataframe":true,"options":{"width":"100%","height":"100%","nodes":{"shape":"dot"},"manipulation":{"enabled":false}},"groups":["Grey","Red","Gold"],"width":"100%","height":null,"idselection":{"enabled":false,"style":"width: 150px; height: 26px","useLabels":true,"main":"Select by id"},"byselection":{"enabled":true,"style":"width: 150px; height: 26px","multiple":false,"hideColor":"rgba(200,200,200,0.5)","highlight":false,"variable":"group","main":"Select by group","values":["Gold","Grey","Red"]},"main":null,"submain":null,"footer":null,"background":"rgba(0, 0, 0, 0)","highlight":{"enabled":false,"hoverNearest":false,"degree":1,"algorithm":"all","hideColor":"rgba(200,200,200,0.5)","labelOnly":true},"collapse":{"enabled":false,"fit":false,"resetHighlight":true,"clusterOptions":null,"keepCoord":true,"labelSuffix":"(cluster)"}},"evals":[],"jsHooks":[]}</script>
 <table class=" lightable-classic" style="font-family: helvetica; width: auto !important; margin-left: auto; margin-right: auto;">
 <caption>
 How Many Do You Know in Each Group?
@@ -6086,6 +6086,35 @@ node10knows
 </tr>
 </tbody>
 </table>
+<p>```{r. echo=FALSE} shinyApp(</p>
+<p>ui = fluidPage( titlePanel(“Click on a node to see how many they know
+in each group!”), visNetworkOutput(“network_proxy”, height = “400px”),
+dataTableOutput(“nodes_data_from_shiny”) )</p>
+server = function(input, output, session) { #dataset node =
+data.frame(id = 1:10, label = as.character(1:10), shape = “circle”,
+font.size = 30, align = “center”, group = c(rep(“Grey”, 3), rep(“Red”,
+3), rep(“Gold”, 4)), borderWidth = 2, color.background =
+c(rep(“slategrey”, 3), rep(“tomato”, 3), rep(“gold”, 4)), color.border =
+“black”, color.highlight.background = “green”, color.highlight.border =
+“black”, shadow = TRUE # title = paste0(“</b>Node
+</p>
+<p>“, 1:10) )</p>
+<p>edge = data.frame(from = c(1, 1, 2, 3, 4, 4, 5, 6, 7, 8, 8, 9, 9, 10,
+10), to = c(2, 3, 3, 5, 5, 6, 6, 7, 8, 9, 10, 10, 1, 7, 3))</p>
+<p>ARD = data.frame(rbind(c(1, 2, 0, 1), c(2, 2, 0, 0), c(3, 2, 1, 1),
+c(4, 0, 2, 0), c(5, 1, 2, 0), c(6, 0, 2, 1), c(7, 0, 1, 2), c(8, 0, 0,
+3), c(9, 1, 0, 2), c(10, 1, 0, 3)))</p>
+<p>colnames(ARD) = c(“Node”, “Grey”, “Red”, “Gold”)</p>
+<p>output$network_proxy = renderVisNetwork({ visNetwork(node, edge)
+%&gt;% visOptions(highlightNearest=TRUE) %&gt;%</p>
+<pre><code>  visEvents(select = &quot;function(nodes) {
+            Shiny.onInputChange(&#39;current_node_id&#39;, nodes.nodes);
+            ;}&quot;)</code></pre>
+<p>})</p>
+<p>output$nodes_data_from_shiny = renderDT({ info = data.frame(ARD)</p>
+<pre><code>info[ARD$Node == input$current_node_id, ]</code></pre>
+<p>}, rownames = FALSE)</p>
+<p>} ) ```</p>
 </div>
 
 

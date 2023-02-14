@@ -1,8 +1,10 @@
 ---
-title: "Consistently Estimating Network Statistics with Aggregated Relational Data (ARD)"
-author: "Explainer by Adam Visokay"
-date: '2023-02-09'
-output: html_document
+title: " "
+author: " "
+date: ' '
+output:
+  html_document
+runtime: shiny
 ---
 
 ```{r include=FALSE}
@@ -10,80 +12,128 @@ library(visNetwork)
 library(igraph)
 library(r2d3)
 library(kableExtra)
+library(dplyr)
+library(shiny)
+library(shinythemes)
+library(DT)
 ```
+
 <br>
 
-### This is toy example is intended to illustrate the estimation procedure from this paper [Consistently Estimating Network Statistics with Aggregated Relational Data (ARD)](https://arxiv.org/abs/1908.09881). 
+# Consistently estimating network statistics using Aggregated Relational Data (***ARD***)
+The full paper can be found [here](https://arxiv.org/abs/1908.09881).
 
-ABSTRACT. Collecting complete network data is expensive, time-consuming, and often infeasible. Aggregated Relational Data (ARD), which capture information about a social network by asking a respondent questions of the form ``How many people with trait X do you know?'' provide a low-cost option when collecting complete network data is not possible. Rather than asking about connections between each pair of individuals directly, ARD collects the number of contacts the respondent knows with a given trait. Despite widespread use and a growing literature on ARD methodology, there is still no systematic understanding of when and why ARD should accurately recover features of the unobserved network. This paper provides such a characterization by deriving conditions under which statistics about the unobserved network (or functions of these statistics like regression coefficients) can be consistently estimated using ARD. We do this by first providing consistent estimates of network model parameters for three commonly used probabilistic models: the beta-model with node-specific unobserved effects, the stochastic block model with unobserved community structure, and latent geometric space models with unobserved latent locations. A key observation behind these results is that cross-group link probabilities for a collection of (possibly unobserved) groups identifies the model parameters, meaning ARD is sufficient for parameter estimation. With these estimated parameters, it is possible to simulate graphs from the fitted distribution and analyze the distribution of network statistics. We can then characterize conditions under which the simulated networks based on ARD will allow for consistent estimation of the unobserved network statistics, such as eigenvector centrality or response functions by or of the unobserved network, such as regression coefficients.
+<br>
 
-Suppose that this is the unobserved network of interest: comprised of 10 nodes, each belonging to one of 3 distinct groups A, B or C. 
+### Collecting complete network data is expensive, time-consuming, and often infeasible. 
+
+### ***ARD*** captures network information by asking a respondent questions of the form:
+
+<br>
+
+<center> <font size="5">  ***How many people with trait X do you know?*** </font>  </center>
+
+<br>
+
+### How can we use this relatively low-cost data to estimate features of the complete network when it cannot be directly observed?
+
+### Here's an example of how it works.
+
+<br>
+
+# 1. Gather some Aggregated Relational Data
+
+### First, let $G$ represent an unobserved network with 10 nodes and 3 groups. 
+
+### Assume we are in a setting where we only have access to a few nodes.
+
+<br>
+
+<center> <font size="5">  ***Click on a node to see its neighbors!*** </font>  </center>
 
 ```{r, echo=FALSE}
-# create network and visualize the 3 groups
+
+#dataset
 nodes = data.frame(id = 1:10,
-                   shape = "circle",
-                   font.size = 30,
-                   align = "center",
-                   label = as.character(1:10),
-                   group = c(rep("Grey", 3), 
-                             rep("Red", 3), 
-                             rep("Gold", 4)),
-                   borderWidth = 2,
-                   color.background = c(rep("slategrey", 3), 
-                                        rep("tomato", 3), 
-                                        rep("gold", 4)),
-                   color.border = "black",
-                   color.highlight.background = "green", 
-                   color.highlight.border = "black",
-                   shadow = TRUE
-                   # title = paste0("</b>Node </p>", 1:10)
-                   )
+                  label = as.character(1:10),
+                  shape = "circle",
+                  font.size = 30,
+                  align = "center",
+                  group = c(rep("Grey", 3), 
+                            rep("Red", 3), 
+                            rep("Gold", 4)),
+                  borderWidth = 2,
+                  color.background = c(rep("slategrey", 3), 
+                                       rep("tomato", 3), 
+                                       rep("gold", 4)),
+                  color.border = "black",
+                  color.highlight.background = "green", 
+                  color.highlight.border = "black",
+                  shadow = TRUE
+                  # title = paste0("</b>Node </p>", 1:10)
+)
+
+edges = data.frame(from = c(1, 1, 2, 3, 4, 4, 5, 6, 7, 8, 8, 9, 9, 10, 10), 
+                  to   = c(2, 3, 3, 5, 5, 6, 6, 7, 8, 9, 10, 10, 1, 7, 3))
+
+# how many each node knows data
+ARD = data.frame(rbind(c(1, 2, 0, 1),
+                       c(2, 2, 0, 0),
+                       c(3, 2, 1, 1),
+                       c(4, 0, 2, 0),
+                       c(5, 1, 2, 0),
+                       c(6, 0, 2, 1),
+                       c(7, 0, 1, 2),
+                       c(8, 0, 0, 3),
+                       c(9, 1, 0, 2),
+                       c(10, 1, 0, 3)))
+colnames(ARD) = c("Node", "Grey", "Red", "Gold")
+
+ui = fluidPage(
+  visNetworkOutput("network_proxy", height = "600px"),
+  dataTableOutput("nodes_data_from_shiny")
+)
+
+server = function(input, output, session) {
+
+  # highlight selected node and contacts
+  output$network_proxy = renderVisNetwork({
+    visNetwork(nodes, edges) %>%
+      visOptions(highlightNearest=TRUE) %>%
+      
+      visEvents(select = "function(nodes) {
+                Shiny.onInputChange('current_node_id', nodes.nodes);
+                ;}")
+  })
+  
+  # display output from ARD table based on node selection
+  output$nodes_data_from_shiny = renderDT({
+    info = data.frame(ARD)
+    
+    info[ARD$Node == input$current_node_id, ]
+  }, 
+  
+  # only display table, not search or page toggle
+  options = list(dom = 't'),
+  rownames = FALSE)
+
+}
+
+shinyApp(ui, server, options = list(height = 725))
 ```
 
-```{r, echo=FALSE}
-edges <- data.frame(from = c(1, 1, 2, 3, 4, 4, 5, 6, 7, 8, 8, 9, 9, 10, 10), 
-                    to =   c(2, 3, 3, 5, 5, 6, 6, 7, 8, 9, 10, 10, 1, 7, 3),
-                    color = "black"
-                    # length = 150
-                    )
-```
+### As you can see, ***node 4*** has only two contacts and they are both in the *Red* group while ***node 3*** knows two in the *Grey* group, and one each in *Red* and *Gold*. 
 
-```{r, echo=FALSE}
-visNetwork(nodes, edges, width = "100%") %>% 
-  visOptions(selectedBy = "group")
-```
+<br>
 
-```{r, echo=FALSE}
-# ARD matrix
-ARD = data.frame(rbind(node1knows = c(2, 0, 1),
-                       node2knows = c(2, 0, 0),
-                       node3knows = c(2, 1, 1),
-                       node4knows = c(0, 2, 0),
-                       node5knows = c(1, 2, 0),
-                       node6knows = c(0, 2, 1),
-                       node7knows = c(0, 1, 2),
-                       node8knows = c(0, 0, 3),
-                       node9knows = c(1, 0, 2),
-                       node10knows = c(0, 1, 3)))
-colnames(ARD) = c("Grey", "Red", "Gold")
-```
-
-```{r, echo=FALSE}
+```{r, echo = FALSE}
 ARD %>%
-  kbl(caption="How Many Do You Know in Each Group?",
-      format= "html",
-      col.names = c("Grey","Red","Gold"),
-      align="r") %>%
-  kable_classic(full_width = F, html_font = "helvetica")
+  kbl() %>%
+  kable_styling(bootstrap_options = c("striped", "hover"))
 ```
 
 
-
-
-
-
-
+### To da!
 
 
 
