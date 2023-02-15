@@ -35,37 +35,28 @@ The full paper can be found [here](https://arxiv.org/abs/1908.09881).
 
 <br>
 
-### How can we use this relatively low-cost data to estimate features of the complete network when it cannot be directly observed?
+### Researchers can use this relatively low-cost data to estimate features of the complete network when it cannot be directly observed.
 
-### Here's an example of how it works.
-
-<br>
-
-# 1. Gather some Aggregated Relational Data
-
-### First, let $G$ represent an unobserved network with 10 nodes and 3 groups. 
-
-### Assume we are in a setting where we only have access to a few nodes.
+### Here's how it works.
 
 <br>
 
-<center> <font size="5">  ***Click on a node to see its neighbors!*** </font>  </center>
+### Assume the population of interest consists of 10 nodes, and each node belongs to one of two groups (Red or Gold). In this setting, ***group status cannot be directly observed by the researcher.*** 
 
 ```{r, echo=FALSE}
 
 #dataset
 nodes = data.frame(id = 1:10,
                   label = as.character(1:10),
-                  shape = "circle",
-                  font.size = 30,
+                  shape = "dot",
+                  size = 25, 
+                  font.size = 25,
                   align = "center",
-                  group = c(rep("Grey", 3), 
-                            rep("Red", 3), 
-                            rep("Gold", 4)),
+                  group = c(rep("Red", 5), 
+                            rep("Gold", 5)),
                   borderWidth = 2,
-                  color.background = c(rep("slategrey", 3), 
-                                       rep("tomato", 3), 
-                                       rep("gold", 4)),
+                  color.background = c(rep("tomato", 5), 
+                                       rep("gold", 5)),
                   color.border = "black",
                   color.highlight.background = "green", 
                   color.highlight.border = "black",
@@ -73,21 +64,149 @@ nodes = data.frame(id = 1:10,
                   # title = paste0("</b>Node </p>", 1:10)
 )
 
-edges = data.frame(from = c(1, 1, 2, 3, 4, 4, 5, 6, 7, 8, 8, 9, 9, 10, 10), 
-                  to   = c(2, 3, 3, 5, 5, 6, 6, 7, 8, 9, 10, 10, 1, 7, 3))
+visNetwork(nodes)
+```
+
+### Nodes in this network form edges with a connection probability such that nodes of the ***same group*** are ***more likely*** to connect. 
+
+### Let $G$ represent the complete, unobserved network. 
+
+```{r, echo=FALSE}
+
+#dataset
+nodes = data.frame(id = 1:10,
+                  label = as.character(1:10),
+                  shape = "dot",
+                  size = 25, 
+                  font.size = 25,
+                  align = "center",
+                  group = c(rep("Red", 5), 
+                            rep("Gold", 5)),
+                  borderWidth = 2,
+                  color.background = c(rep("tomato", 5), 
+                                       rep("gold", 5)),
+                  color.border = "black",
+                  color.highlight.background = "green", 
+                  color.highlight.border = "black",
+                  shadow = TRUE
+                  # title = paste0("</b>Node </p>", 1:10)
+)
+
+edges = data.frame(from = c(1, 2, 3, 3, 4, 4, 5, 6, 6, 7, 8, 9, 10),
+                  to   = c(3, 3, 4, 5, 5, 6, 7, 2, 8, 8, 9, 10, 8))
+
+visNetwork(nodes, edges)
+```
+
+### Finally, each node has two observable traits: size (small or large) and shape (circle, triangle, square or star). 
+
+### We assume that these traits are associated with latent group status, but not perfectly. 
+
+```{r, echo=FALSE}
+
+#dataset
+nodes = data.frame(id = 1:10,
+                  label = as.character(1:10),
+                  shape = c("dot", 
+                            "triangle",
+                            "square", 
+                            "triangle",
+                            "square", 
+                            "triangle",
+                            "star", 
+                            "dot",
+                            "star", 
+                            "triangle"),
+                  size = c(20,
+                           40,
+                           20,
+                           40,
+                           40,
+                           20,
+                           20,
+                           40,
+                           20,
+                           20), 
+                  font.size = 25,
+                  align = "center",
+                  group = c(rep("Red", 5), 
+                            rep("Gold", 5)),
+                  borderWidth = 2,
+                  color.background = c(rep("tomato", 5), 
+                                       rep("gold", 5)),
+                  color.border = "black",
+                  color.highlight.background = "green", 
+                  color.highlight.border = "black",
+                  shadow = TRUE
+                  # title = paste0("</b>Node </p>", 1:10)
+)
+
+edges = data.frame(from = c(1, 2, 3, 3, 4, 4, 5, 6, 6, 7, 8, 9, 10),
+                  to   = c(3, 3, 4, 5, 5, 6, 7, 2, 8, 8, 9, 10, 8))
+
+visNetwork(nodes, edges)
+```
+
+### Asking each node $i$ in $G$ how many of their neighbors have a given trait yields ARD response $y_i$.
+
+<br>
+
+<center> <font size="5">  ***Click on a node to see its ARD response $y_i$!*** </font>  </center>
+
+```{r, echo=FALSE}
+
+#dataset
+nodes = data.frame(id = 1:10,
+                  label = as.character(1:10),
+                  shape = c("dot", 
+                            "triangle",
+                            "square", 
+                            "triangle",
+                            "square", 
+                            "triangle",
+                            "star", 
+                            "dot",
+                            "star", 
+                            "triangle"),
+                  size = c(20,
+                           40,
+                           20,
+                           40,
+                           40,
+                           20,
+                           20,
+                           40,
+                           20,
+                           20), 
+                  font.size = 25,
+                  align = "center",
+                  group = c(rep("Red", 5), 
+                            rep("Gold", 5)),
+                  borderWidth = 2,
+                  color.background = c(rep("tomato", 5), 
+                                       rep("gold", 5)),
+                  color.border = "black",
+                  color.highlight.background = "green", 
+                  color.highlight.border = "black",
+                  shadow = TRUE
+                  # title = paste0("</b>Node </p>", 1:10)
+)
+
+edges = data.frame(from = c(1, 2, 3, 3, 4, 4, 5, 6, 6, 7, 8, 9, 10),
+                  to   = c(3, 3, 4, 5, 5, 6, 7, 2, 8, 8, 9, 10, 8))
 
 # how many each node knows data
-ARD = data.frame(rbind(c(1, 2, 0, 1),
-                       c(2, 2, 0, 0),
-                       c(3, 2, 1, 1),
-                       c(4, 0, 2, 0),
-                       c(5, 1, 2, 0),
-                       c(6, 0, 2, 1),
-                       c(7, 0, 1, 2),
-                       c(8, 0, 0, 3),
-                       c(9, 1, 0, 2),
-                       c(10, 1, 0, 3)))
-colnames(ARD) = c("Node", "Grey", "Red", "Gold")
+ARD = data.frame(rbind(c(1, 1, 0, 0, 0, 1, 0),
+                       c(2, 2, 0, 0, 1, 1, 0),
+                       c(3, 1, 3, 1, 2, 1, 0),
+                       c(4, 2, 1, 0, 1, 2, 0),
+                       c(5, 2, 1, 0, 1, 1, 1),
+                       c(6, 0, 3, 1, 2, 0, 0),
+                       c(7, 0, 2, 1, 0, 1, 0),
+                       c(8, 4, 0, 0, 2, 0, 2),
+                       c(9, 1, 1, 1, 1, 0, 0),
+                       c(10, 1, 1, 1, 0, 0, 1)))
+colnames(ARD) = c("Node", "Small", "Large", "Circle", "Triangle", "Square", "Star")
 
 ui = fluidPage(
   visNetworkOutput("network_proxy", height = "600px"),
@@ -122,7 +241,7 @@ server = function(input, output, session) {
 shinyApp(ui, server, options = list(height = 725))
 ```
 
-### As you can see, ***node 4*** has only two contacts and they are both in the *Red* group while ***node 3*** knows two in the *Grey* group, and one each in *Red* and *Gold*. 
+### Combining ARD responses $y_i$ yields the following ARD table, $Y$.
 
 <br>
 
@@ -133,7 +252,22 @@ ARD %>%
 ```
 
 
-### To da!
+### $Y$ is then used to fit a model, $\hat\theta$, which detects the number of latent groups and classifies latent group membership for each node in $G^{*}$.
+
+### Bootstrapping estimates from $\hat\theta$ over many draws characterizes the latent structure such that number of groups and group status of nodes in $G^{*}$ ~ $G$.
+
+<br>
+
+<br>
+
+<br>
+
+<br>
+
+<br>
+
+<br>
+
 
 
 
