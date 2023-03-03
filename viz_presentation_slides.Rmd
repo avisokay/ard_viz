@@ -3,7 +3,8 @@ title: " "
 author: " "
 date: ' '
 output:
-  html_document
+  html_document:
+    theme: cosmo
 runtime: shiny
 ---
 
@@ -37,6 +38,8 @@ The full paper can be found [here](https://arxiv.org/abs/1908.09881).
 
 ### However, collecting complete ***network data*** for this type of research is expensive, time-consuming, and often infeasible. 
 
+### ***ARD*** offers a cheaper alternative to researchers who cannot otherwise acquire network data.
+
 ### ***ARD*** captures network information by asking a respondent questions of the form:
 
 <br>
@@ -45,11 +48,13 @@ The full paper can be found [here](https://arxiv.org/abs/1908.09881).
 
 <br>
 
-### When observable traits are associated with latent communities, researchers can use ARD responses to estimate latent community structure.  
+### When observable traits are associated with latent communities, researchers can use observations from ARD responses to estimate latent community structure of the full network.  
 
 <br>
+
+# 1. Generating an example network.
  
-### To illustrate how it works, let's generate a network of 10 nodes. 
+### To illustrate how it works, let's begin by generating a network of 10 nodes. 
 
 ### Each node is randomly assigned to one of two communities, ***Red*** or ***Gold***.
 
@@ -62,10 +67,10 @@ nodes = data.frame(id = 1:10,
                   size = 30, 
                   font.size = 25,
                   align = "center",
-                  group = c(rep("Red", 5), 
+                  group = c(rep("tomato", 5), 
                             rep("Gold", 5)),
                   borderWidth = 2,
-                  color.background = c(rep("Red", 5), 
+                  color.background = c(rep("tomato", 5), 
                                        rep("Gold", 5)),
                   color.border = "black",
                   color.highlight.background = c(rep("tomato", 5), 
@@ -82,10 +87,10 @@ visNetwork(nodes, edges)
 
 ### Next, let's assign a shape trait to each node; either a ***Triangle***, ***Square***, or a ***Star***. 
 
-### Assume that traits are associated with community, but not perfectly correlated.
-<center> <font size="5">  ***(remember this for later)*** <font> <center/>
+### ***We assume that traits are associated with community, but not perfectly correlated.***  
+<center> <font size="5">  (remember this for later) <font> <center/>
 
-### In this example, a node is more likely to be a ***Square*** if it is in the ***Gold*** community, more likely to be a ***Triangle*** if it is in the ***Red*** community, and equally likely to be a ***Star*** regardless of community. 
+### For this example, a node is more likely to be a ***Square*** if it is in the ***Gold*** community, more likely to be a ***Triangle*** if it is in the ***Red*** community, and equally likely to be a ***Star*** regardless of community. 
 
 ```{r, echo=FALSE}
 
@@ -105,10 +110,10 @@ nodes = data.frame(id = 1:10,
                   size = 30, 
                   font.size = 25,
                   align = "center",
-                  group = c(rep("Red", 5), 
+                  group = c(rep("tomato", 5), 
                             rep("Gold", 5)),
                   borderWidth = 2,
-                  color.background = c(rep("Red", 5), 
+                  color.background = c(rep("tomato", 5), 
                                        rep("Gold", 5)),
                   color.border = "black",
                   color.highlight.background = c(rep("tomato", 5), 
@@ -123,9 +128,11 @@ edges = c()
 visNetwork(nodes, edges)
 ```
 
-### Finally, we assume there is community homophily in this network such that the ***probability*** of node $i$ forming an edge with node $j$, $p_{ij}$, is ***higher*** if $i$ and $j$ are in the ***same community***.
+### Finally, we assume there is ***community homophily*** in this network such that the ***probability*** of node $i$ forming an edge with node $j$, $p_{ij}$, is ***greater*** if $i$ and $j$ are in the ***same community***.
 
 ### In other words, ***Red*** nodes are more likely to connect with other ***Red***  nodes, and same for ***Gold*** nodes. 
+
+### Now that we have generated nodes and assigned communities, traits and edges, we will call this complete network $G$. 
 
 ```{r, echo=FALSE}
 
@@ -145,10 +152,10 @@ nodes = data.frame(id = 1:10,
                   size = 30, 
                   font.size = 25,
                   align = "center",
-                  group = c(rep("Red", 5), 
+                  group = c(rep("tomato", 5), 
                             rep("Gold", 5)),
                   borderWidth = 2,
-                  color.background = c(rep("Red", 5), 
+                  color.background = c(rep("tomato", 5), 
                                        rep("Gold", 5)),
                   color.border = "black",
                   color.highlight.background = c(rep("tomato", 5), 
@@ -164,80 +171,56 @@ edges = data.frame(from = c(1, 2, 3, 3, 4, 4, 5, 6, 6, 7, 8, 9, 10),
 visNetwork(nodes, edges)
 ```
 
-### Now that we have generated nodes, assigned communities traits and edges, we will call this complete observed network $G$. 
-
 ### $G$ is what a researcher would oberve if they could collect complete network data.
 
-### 
-
-
-### In this example, the goal of the researcher is to estimate which nodes belong to which groups when ***group status cannot be directly observed***.
-
-<center> <font size="5">  *Click on a node to check it's latent group!* </font>  </center>
+### In this example however, the researcher can only directly observe traits, not communities or edges between individual nodes. We call this observed network $G^{*}$.
 
 ```{r, echo=FALSE}
 
 #dataset
 nodes = data.frame(id = 1:10,
                   label = as.character(1:10),
-                  shape = "dot",
-                  size = 35, 
-                  font.size = 25,
-                  align = "center",
-                  group = c(rep("Red", 5), 
-                            rep("Gold", 5)),
-                  borderWidth = 2,
-                  color.background = "slategrey",
-                  color.border = "black",
-                  color.highlight.background = c(rep("tomato", 5), 
-                                                 rep("gold", 5)),
-                  color.highlight.border = "black",
-                  shadow = TRUE
-                  # title = paste0("</b>Node </p>", 1:10)
-)
-
-visNetwork(nodes)
-```
-
-### Nodes in this network form edges with a connection probability $p_{ij}$ such that nodes of the ***same group*** are ***more likely*** to connect. 
-
-### Let $G$ represent the complete network. 
-
-```{r, echo=FALSE}
-
-#dataset
-nodes = data.frame(id = 1:10,
-                  label = as.character(1:10),
-                  shape = "dot",
+                  shape = c("star", 
+                            "triangle",
+                            "triangle", 
+                            "triangle",
+                            "square", 
+                            "triangle",
+                            "square", 
+                            "star",
+                            "square", 
+                            "square"),
                   size = 30, 
                   font.size = 25,
                   align = "center",
-                  group = c(rep("Red", 5), 
+                  group = c(rep("tomato", 5), 
                             rep("Gold", 5)),
                   borderWidth = 2,
                   color.background = "slategrey",
                   color.border = "black",
-                  color.highlight.background = c(rep("tomato", 5), 
-                                                 rep("gold", 5)),
+                  color.highlight.background = "slategrey",
                   color.highlight.border = "black",
                   shadow = TRUE
                   # title = paste0("</b>Node </p>", 1:10)
 )
 
-edges = data.frame(from = c(1, 2, 3, 3, 4, 4, 5, 6, 6, 7, 8, 9, 10),
-                  to   = c(3, 3, 4, 5, 5, 6, 7, 2, 8, 8, 9, 10, 8))
+edges = c()
 
 visNetwork(nodes, edges)
 ```
 
-### Finally, each node has a specific ***trait*** illustrated by different shapes (star, triangle or square).
+# 2. Gathering Aggregated Relational Data (***ARD***)
 
-### We assume that these observable ***traits*** are associated with latent group status, but not perfectly correlated. 
+### Recall that ***ARD*** is collected by asking nodes in a network questions of the form *How many people with trait X do you know?* 
+
+### In this example, the researcher would ask each node: How many ***Triangles*** do you know? How many ***Squares***? How many ***Stars***?
+
+<br> 
+<center> <font size="5">  ***Click on a node to see each shape it knows!*** </font>  </center>
 
 ```{r, echo=FALSE}
-
 #dataset
-nodes = data.frame(id = 1:10,
+node = data.frame(id = 1:10,
                   label = as.character(1:10),
                   shape = c("star", 
                             "triangle",
@@ -261,69 +244,19 @@ nodes = data.frame(id = 1:10,
                            30), 
                   font.size = 25,
                   align = "center",
-                  group = c(rep("Red", 5), 
-                            rep("Gold", 5)),
-                  borderWidth = 2,
-                  color.background = "slategrey",
-                  color.border = "black",
-                  color.highlight.background = c(rep("tomato", 5), 
-                                                 rep("gold", 5)),
-                  color.highlight.border = "black",
-                  shadow = TRUE
-                  # title = paste0("</b>Node </p>", 1:10)
-)
-
-edges = data.frame(from = c(1, 2, 3, 3, 4, 4, 5, 6, 6, 7, 8, 9, 10),
-                  to   = c(3, 3, 4, 5, 5, 6, 7, 2, 8, 8, 9, 10, 8))
-
-visNetwork(nodes, edges)
-```
-
-<br>
-
-<center> <font size="5">  ***Click on a node to see its ARD response $y_i$!*** </font>  </center>
-
-```{r, echo=FALSE}
-
-#dataset
-nodes = data.frame(id = 1:10,
-                  label = as.character(1:10),
-                  shape = c("star", 
-                            "triangle",
-                            "triangle", 
-                            "triangle",
-                            "square", 
-                            "triangle",
-                            "square", 
-                            "star",
-                            "square", 
-                            "square"),
-                  size = c(35,
-                           30,
-                           30,
-                           30,
-                           30,
-                           30,
-                           30,
-                           35,
-                           30,
-                           30), 
-                  font.size = 25,
-                  align = "center",
-                  # group = c(rep("Red", 5), 
+                  # group = c(rep("tomato", 5), 
                   #           rep("Gold", 5)),
                   borderWidth = 2,
                   color.background = "slategrey",
                   color.border = "black",
-                  color.highlight.background = c(rep("tomato", 5), 
-                                                 rep("gold", 5)),
+                  color.highlight.background = "slategrey",
                   color.highlight.border = "black",
                   shadow = TRUE
                   # title = paste0("</b>Node </p>", 1:10)
 )
-
-edges = data.frame(from = c(1, 2, 3, 3, 4, 4, 5, 6, 6, 7, 8, 9, 10),
-                  to   = c(3, 3, 4, 5, 5, 6, 7, 2, 8, 8, 9, 10, 8))
+edge = data.frame(from = c(1, 2, 3, 3, 4, 4, 5, 6, 6, 7, 8, 9, 10),
+                  to   = c(3, 3, 4, 5, 5, 6, 7, 2, 8, 8, 9, 10, 8),
+                  color = "white")
 
 # how many each node knows data
 ARD = data.frame(rbind(c(1, 0, 1, 0),
@@ -337,17 +270,14 @@ ARD = data.frame(rbind(c(1, 0, 1, 0),
                        c(9, 1, 0, 1),
                        c(10, 1, 0, 1)))
 colnames(ARD) = c("Node", "Star", "Triangle", "Square")
-
 ui = fluidPage(
     visNetworkOutput("network_proxy", height = "600px"),
     dataTableOutput("nodes_data_from_shiny", width="100%")
 )
-
 server = function(input, output, session) {
-
   # highlight selected node and contacts
   output$network_proxy = renderVisNetwork({
-    visNetwork(nodes, edges) %>%
+    visNetwork(node, edge) %>%
       visOptions(highlightNearest=TRUE) %>%
       
       visEvents(select = "function(nodes) {
@@ -365,15 +295,13 @@ server = function(input, output, session) {
   # only display table, not search or page toggle
   options = list(dom = 't'),
   rownames = FALSE)
-
 }
-
 shinyApp(ui, server, options = list(height = 725))
 ```
 
-### Asking each node $i$ in $G$ how many of their neighbors have a given ***trait*** yields ARD response $y_i$.
+### Asking each node $i$ in $G^{*}$ how many of their neighbors have a given ***trait***  produces a single ARD response $y_i$.
 
-### Combining ARD responses $y_i$ yields the following ARD table, $Y$.
+### Aggregating responses $y_i$ yields the following ***ARD*** table, $Y$.
 
 <br>
 
@@ -383,9 +311,24 @@ ARD %>%
   kable_styling(bootstrap_options = c("striped", "hover"), full_width = T)
 ```
 
-### Now we can estimate latent groups using observed traits from ARD responses $Y$.  
+### 3. Estimating Community Structure using ***ARD***
 
-### First we disaggregate ARD response $y_i$ by observed trait. For example, for node 8 we have $y_8$.
+### Now we can use ***ARD*** responses $Y$ we gathered above to estimate latent groups for the complete network.
+
+### First, we cluster nodes into communities $C_1$ and $C_2$ based on their ***ARD*** response $y_i$.
+
+```{r, echo = FALSE}
+
+knitr::include_graphics("communities.PNG")
+
+```
+
+### There are many methods researchers could use for this clustering, but for this example we simply put ***Triangles*** together into $C_1$, ***Squares*** together into $C_2$, and one ***Star*** in each at random since there are only two. 
+
+### Then for each ARD response $y_i$ we disaggregate
+
+
+
 
 ```{r, echo = FALSE}
 
@@ -430,7 +373,7 @@ nodes = data.frame(id = 1:10,
                            30), 
                   font.size = 25,
                   align = "center",
-                  group = c(rep("Red", 5), 
+                  group = c(rep("tomato", 5), 
                             rep("Gold", 5)),
                   borderWidth = 2,
                   color.background = c(rep("tomato", 5), 
@@ -450,9 +393,9 @@ visNetwork(nodes, edges)
 ```
 
 
-### Remember how we assumed that observable ***traits*** are associated with latent group membership? We can use this assumption to take the ARD responses to classify group status for each node $i$. 
+### Remember how we assumed that observable ***traits*** are associated with latent group membership? We can use this assumption to take the ***ARD*** responses to classify group status for each node $i$. 
 
-### For example, if ARD response $y_i$ knows multiple squares, node $i$ is probably part in the ***Yellow*** community. On the other hand, if $y_i$ knows multiple triangles, node $i$ probably belongs to ***Red***.
+### For example, if ***ARD*** response $y_i$ knows multiple squares, node $i$ is probably part in the ***Yellow*** community. On the other hand, if $y_i$ knows multiple triangles, node $i$ probably belongs to ***Red***.
 
 ### $Y$ is used to fit a model, $\hat\theta$, which detects the number of latent groups and classifies latent group membership for each node in $G^{*}$.
 
@@ -525,3 +468,49 @@ visNetwork(nodes, edges)
 <br>
 
 <br>
+
+
+```{r echo = FALSE}
+# 
+# row <- function(...) {
+#   tags$div(class="row", ...)
+# }
+# 
+# col <- function(width, ...) {
+#   tags$div(class=paste0("span", width), ...)
+# }
+# 
+# shinyUI(bootstrapPage(
+# 
+#   headerPanel("PDF VIEWER"),
+# 
+#   mainPanel(
+# 
+#     tags$div(
+#       class = "container",
+# 
+#       row(
+#         col(3, textInput("pdfurl", "PDF URL"))
+#       ),
+#       row(
+#         col(6, htmlOutput('pdfviewer')),
+#         col(6, tags$iframe(style="height:600px; width:100%", src="http://127.0.0.1:6895/viz_presentation_slides.Rmd"))
+#       )
+#     )
+#   )
+# ))
+# 
+# 
+# shinyServer(function(input, output, session) {
+# 
+#   output$pdfviewer <- renderText({
+#       return(paste('<iframe style="height:600px; width:100%" src="', input$pdfurl, '"></iframe>', sep = ""))
+#   })
+# 
+# })
+
+```
+
+
+
+
