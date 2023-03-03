@@ -11,9 +11,9 @@ runtime: shiny
 ```{r include=FALSE}
 library(visNetwork)
 library(igraph)
-library(ggdag)
-library(dagitty)
-library(ggthemes)
+# library(ggdag)
+# library(dagitty)
+# library(ggthemes)
 library(r2d3)
 library(kableExtra)
 library(dplyr)
@@ -301,7 +301,9 @@ shinyApp(ui, server, options = list(height = 725))
 
 ### Asking each node $i$ in $G^{*}$ how many of their neighbors have a given ***trait***  produces a single ARD response $y_i$.
 
-### Aggregating responses $y_i$ yields the following ***ARD*** table, $Y$.
+### For example, node 4's ARD response, $y_4$ is two ***Triangles*** and one ***Square*** while $y_8$ is three ***Sqares*** and one ***Triangle***. 
+
+### Aggregating all responses $y_i$ yields the following ***ARD*** table, $Y$.
 
 <br>
 
@@ -325,18 +327,31 @@ knitr::include_graphics("communities.PNG")
 
 ### There are many methods researchers could use for this clustering, but for this example we simply put ***Triangles*** together into $C_1$, ***Squares*** together into $C_2$, and one ***Star*** in each at random since there are only two. 
 
-### Then for each ARD response $y_i$ we disaggregate
+### Then we calculate the fraction of each trait in each community. So in our example we have
 
+```{r, echo = FALSE}
 
+community_fraction = data.frame(C1 = c("20%", "0%", "80%"),
+                                C2 = c("20%", "80%", "0%"))
+rownames(community_fraction) = c("Star", "Square", "Triangle")
 
+community_fraction %>%
+  kbl() %>%
+  kable_styling(bootstrap_options = c("striped", "hover"), 
+                # full_width = FALSE,
+                position = "center")
+```
 
+### For each ARD response $y_i$ we disaggregete by trait and calculate the fraction of $y_i$'s contacts with each trait.
+
+<center> <font size = 5> Disaggregating ARD response $y_8$ <font> <center/>
 ```{r, echo = FALSE}
 
 knitr::include_graphics("disaggregate.PNG")
 
 ```
 
-### Then for each trait, we compute the fraction of nodes with trait $k$ in community $c$. 
+### 75% of $y_8$'s contatcts are ***Squares***, and 25% are ***Triangles***.
 
 ```{r, echo = FALSE}
 
@@ -471,43 +486,6 @@ visNetwork(nodes, edges)
 
 
 ```{r echo = FALSE}
-# 
-# row <- function(...) {
-#   tags$div(class="row", ...)
-# }
-# 
-# col <- function(width, ...) {
-#   tags$div(class=paste0("span", width), ...)
-# }
-# 
-# shinyUI(bootstrapPage(
-# 
-#   headerPanel("PDF VIEWER"),
-# 
-#   mainPanel(
-# 
-#     tags$div(
-#       class = "container",
-# 
-#       row(
-#         col(3, textInput("pdfurl", "PDF URL"))
-#       ),
-#       row(
-#         col(6, htmlOutput('pdfviewer')),
-#         col(6, tags$iframe(style="height:600px; width:100%", src="http://127.0.0.1:6895/viz_presentation_slides.Rmd"))
-#       )
-#     )
-#   )
-# ))
-# 
-# 
-# shinyServer(function(input, output, session) {
-# 
-#   output$pdfviewer <- renderText({
-#       return(paste('<iframe style="height:600px; width:100%" src="', input$pdfurl, '"></iframe>', sep = ""))
-#   })
-# 
-# })
 
 ```
 
