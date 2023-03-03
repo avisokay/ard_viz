@@ -48,13 +48,17 @@ The full paper can be found [here](https://arxiv.org/abs/1908.09881).
 
 <br>
 
-### When observable traits are associated with latent communities, researchers can use observations from ARD responses to estimate latent community structure of the full network.  
+# 1. What are we trying to estimate?
 
-<br>
+### Imagine there are two distinct latent communities, $c$ and $c`$. We want to know the probability that a member of $c$ connects with a member of $c`$. 
 
-# 1. Generating an example network.
- 
-### To illustrate how it works, let's begin by generating a network of 10 nodes. 
+### This simplified 
+
+### When observable traits are associated with latent communities, researchers can use observations from ARD responses to estimate latent community structure of the full network. 
+
+# 2. Generating an example network.
+
+### Let's begin by generating a network of 10 nodes. 
 
 ### Each node is randomly assigned to one of two communities, ***Red*** or ***Gold***.
 
@@ -90,7 +94,7 @@ visNetwork(nodes, edges)
 ### ***We assume that traits are associated with community, but not perfectly correlated.***  
 <center> <font size="5">  (remember this for later) <font> <center/>
 
-### For this example, a node is more likely to be a ***Square*** if it is in the ***Gold*** community, more likely to be a ***Triangle*** if it is in the ***Red*** community, and equally likely to be a ***Star*** regardless of community. 
+### For this example, a node is more likely to be a ***Square*** if it is in the ***Gold*** community, more likely to be a ***Triangle*** if it is in the ***Red*** community, and equally likely to be a ***Star*** regardless of community.  
 
 ```{r, echo=FALSE}
 
@@ -209,7 +213,7 @@ edges = c()
 visNetwork(nodes, edges)
 ```
 
-# 2. Gathering Aggregated Relational Data (***ARD***)
+# 3. Gathering Aggregated Relational Data (***ARD***)
 
 ### Recall that ***ARD*** is collected by asking nodes in a network questions of the form *How many people with trait X do you know?* 
 
@@ -313,7 +317,7 @@ ARD %>%
   kable_styling(bootstrap_options = c("striped", "hover"), full_width = T)
 ```
 
-### 3. Estimating Community Structure using ***ARD***
+### 4. Estimating Community Structure using ***ARD***
 
 ### Now we can use ***ARD*** responses $Y$ we gathered above to estimate latent groups for the complete network.
 
