@@ -336,7 +336,7 @@ knitr::include_graphics("disaggregate.PNG")
 
 ```
 
-### Then for each trait, we compute the fraction of nodes with trait $k$ in community $c$.
+### Then for each trait, we compute the fraction of nodes with trait $k$ in community $c$. 
 
 ```{r, echo = FALSE}
 
