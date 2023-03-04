@@ -40,27 +40,29 @@ The full paper can be found [here](https://arxiv.org/abs/1908.09881).
 
 ### ***ARD*** offers a cheaper alternative to researchers who cannot otherwise acquire network data.
 
-### ***ARD*** captures network information by asking a respondent questions of the form:
+### To collect ***ARD***, a researcher asks respondents questions of the form:
 
 <br>
 
 <center> <font size="5">  ***How many people with trait X do you know?*** </font>  </center>
 
+### and uses the responses to estimate latent features of the network.
+
 <br>
 
 # 1. What are we trying to estimate?
 
-### Imagine there are two distinct latent communities, $c$ and $c`$. We want to know the probability that a member of $c$ connects with a member of $c`$. 
+### Suppose we want to know the ***probability*** that two nodes connect given that they are each from distinct latent communities $c$ and $c^{\prime}$ which we label as $Pcc^{\prime}$. *EXAMPLE HERE* For example, the probability that ......
 
-### This simplified 
+### When observable traits are associated with latent communities, researchers can use observations from ARD responses to estimate this probability. 
 
-### When observable traits are associated with latent communities, researchers can use observations from ARD responses to estimate latent community structure of the full network. 
+### The remainder of this primer will illustrate the process with a concrete toy example.
 
 # 2. Generating an example network.
 
 ### Let's begin by generating a network of 10 nodes. 
 
-### Each node is randomly assigned to one of two communities, ***Red*** or ***Gold***.
+### Each node is randomly assigned to one of two communities, $c$ (***Red***) or $c^{\prime}$ (***Gold***).
 
 ```{r, echo=FALSE}
 
@@ -89,7 +91,7 @@ edges = c()
 visNetwork(nodes, edges)
 ```
 
-### Next, let's assign a shape trait to each node; either a ***Triangle***, ***Square***, or a ***Star***. 
+### Next, let's assign a shape trait $k$ to each node; either a ***Triangle***, ***Square***, or a ***Star***. In practice, these traits would be age, education, health status, etc.
 
 ### ***We assume that traits are associated with community, but not perfectly correlated.***  
 <center> <font size="5">  (remember this for later) <font> <center/>
@@ -303,9 +305,9 @@ server = function(input, output, session) {
 shinyApp(ui, server, options = list(height = 725))
 ```
 
-### Asking each node $i$ in $G^{*}$ how many of their neighbors have a given ***trait***  produces a single ARD response $y_i$.
+### Asking each node $i$ in $G^{*}$ how many of their neighbors have a given trait ***k***  produces a single ***ARD*** response $y_i$.
 
-### For example, node 4's ARD response, $y_4$ is two ***Triangles*** and one ***Square*** while $y_8$ is three ***Sqares*** and one ***Triangle***. 
+### For example, node 4's ***ARD*** response, $y_4$ is two ***Triangles*** and one ***Square*** while $y_8$ is three ***Sqares*** and one ***Triangle***. 
 
 ### Aggregating all responses $y_i$ yields the following ***ARD*** table, $Y$.
 
@@ -317,11 +319,28 @@ ARD %>%
   kable_styling(bootstrap_options = c("striped", "hover"), full_width = T)
 ```
 
-### 4. Estimating Community Structure using ***ARD***
+# 4. Estimating Community Structure using ***ARD***
 
-### Now we can use ***ARD*** responses $Y$ we gathered above to estimate latent groups for the complete network.
+### Now we can use ***ARD*** responses $Y$ we gathered above to estimate $\hat{P}cc^{\prime}$, the probability of connection between nodes in community $c$ and community $c^{\prime}$.
 
-### First, we cluster nodes into communities $C_1$ and $C_2$ based on their ***ARD*** response $y_i$.
+### This is a simplified version of the equation for $\hat{P}cc^{\prime}$, the details can be found on page seven of the [paper](https://arxiv.org/abs/1908.09881). 
+
+<br>
+
+<center> <font size = 6> $\hat{P}cc^{\prime} = \frac{1}{nc} \sum_{i\hat{c}} \sum \frac{y_{ik} \; \mathbb{P}(community \; = \; \hat{c}^{\prime} \; | \; trait \; = \; k)}{n\hat{c}^{\prime}} \;\;\;\;\;\;\;\;\; (eq. \;1)$ <center/>
+
+### where 
+### $\hat{P}cc^{\prime}$ is the estimated connection probability between a node in $c$ and a node in $c^{\prime}
+### $n\hat{c}$ is the sample size of surveyed nodes in estimated community $\hat{c}$ 
+### $i\hat{c}$ identifies a specific node estimated to be in estimated community $\hat{c}$
+### $y_{ik}$ is the ARD response from node $i$ with trait $k$
+### $n\hat{c}^{\prime}$ is the total size of estimated community $\hat{c}^{\prime}$
+
+<br>
+
+### Now let's estimate $\hat{P}cc^{\prime}$ using our example ARD data $Y$.
+
+### First, we cluster nodes into communities $\hat{c}$ and $\hat{c}^{\prime}$ based on their ***ARD*** response $y_i$.
 
 ```{r, echo = FALSE}
 
@@ -329,7 +348,7 @@ knitr::include_graphics("communities.PNG")
 
 ```
 
-### There are many methods researchers could use for this clustering, but for this example we simply put ***Triangles*** together into $C_1$, ***Squares*** together into $C_2$, and one ***Star*** in each at random since there are only two. 
+### There are many methods researchers could use for this clustering, but for this example we simply put ***Triangles*** together into $\hat{c}$, ***Squares*** together into $\hat{c}^{\prime}$, and one ***Star*** in each at random since there are only two. 
 
 ### Then we calculate the fraction of each trait in each community. So in our example we have
 
@@ -337,31 +356,70 @@ knitr::include_graphics("communities.PNG")
 
 community_fraction = data.frame(C1 = c("20%", "0%", "80%"),
                                 C2 = c("20%", "80%", "0%"))
+names(community_fraction) <- c("$\\hat{c}$", "$\\hat{c}^{\\prime}$")
 rownames(community_fraction) = c("Star", "Square", "Triangle")
 
 community_fraction %>%
   kbl() %>%
   kable_styling(bootstrap_options = c("striped", "hover"), 
-                # full_width = FALSE,
+                full_width = FALSE,
                 position = "center")
 ```
 
-### For each ARD response $y_i$ we disaggregete by trait and calculate the fraction of $y_i$'s contacts with each trait.
+### Then we take ARD responses $y_i$ and disaggregate by each trait $k$ into $y_{ik}$. 
 
-<center> <font size = 5> Disaggregating ARD response $y_8$ <font> <center/>
 ```{r, echo = FALSE}
 
 knitr::include_graphics("disaggregate.PNG")
 
 ```
 
-### 75% of $y_8$'s contatcts are ***Squares***, and 25% are ***Triangles***.
+<br>
 
-```{r, echo = FALSE}
+### Let's work through the calculation $\sum \frac{y_{ik} \; \mathbb{P}(community \; = \; \hat{c}^{\prime} \; | \; trait \; = \; k)}{n\hat{c}^{\prime}}$ for one node, $y_8$. 
 
-knitr::include_graphics("probability.PNG")
+<br>
 
-```
+### $y_8$ knows one ***Triangle*** and three ***Squares***, so we have 
+
+<br>
+
+<center> <font size = 5> $y_{8Triangle} = 1, \;\;\;\;\;\;\;\;\;\;\; y_{8Square} = 3$. <font> </center>
+
+### Because there are 5 nodes each in $n\hat{c}$ and $n\hat{c}^{\prime}$ and we surveyed all nodes, 
+
+<br>
+
+<center> <font size = 5> $n\hat{c} = 5, \;\;\;\;\;\;\;\;\;\;\; n\hat{c}^{\prime} = 5$ <font> </center>
+
+### From the clustering we have 
+
+<br>
+
+<center> <font size = 5> $\mathbb{P}(community \; = \; \hat{c}^{\prime} \; | \; trait \; = \; Triangle) = 0.8$ <font> </center>
+
+<br>
+
+<center> <font size = 5> $\mathbb{P}(community \; = \; \hat{c}^{\prime} \; | \; trait \; = \; Square)  \;\;= 0.2$<font> </center>
+
+### Substituting into 
+
+<br>
+
+<center> <font size = 5> $\frac{y_{ik} \; \mathbb{P}(community \; = \; \hat{c}^{\prime} \; | \; trait \; = \; k)}{n\hat{c}^{\prime}} \;\; gives \;\; \frac{y_{8Triangle} \; * \; \mathbb{P}(community \; = \; \hat{c}^{\prime} \; | \; trait \; = \; k)}{n\hat{c}^{\prime}}$ <font> </center>
+
+<center> <font size = 5> $\frac{1 \; * \; 0.2}{5} = 0.04$ <center/>
+
+### For $y_{8Square}, we compute 
+
+<center> <font size = 5> $\frac{3 \; * \; 0.8}{5} = 0.48$ <center/>
+
+### 
+
+
+
+
+
 
 ### We use this fraction to estimate latent group status for all of the nodes in the graph. 
 
@@ -418,64 +476,6 @@ visNetwork(nodes, edges)
 
 ### $Y$ is used to fit a model, $\hat\theta$, which detects the number of latent groups and classifies latent group membership for each node in $G^{*}$.
 
-
-
-
-```{r, echo=FALSE}
-
-# #dataset
-# nodes = data.frame(id = 6:10,
-#                   label = as.character(1:10),
-#                   shape = c("triangle",
-#                             "square", 
-#                             "star",
-#                             "square", 
-#                             "square"),
-#                   size = c(30,
-#                            30,
-#                            35,
-#                            30,
-#                            30), 
-#                   font.size = 25,
-#                   borderWidth = 2,
-#                   color.background = "slategrey",
-#                   color.border = "black",
-#                   shadow = TRUE
-#                   # title = paste0("</b>Node </p>", 1:10)
-# )
-# 
-# edges = data.frame(from = c(6, 7, 8, 9, 10),
-#                   to   = c(8, 8, 9, 10, 8))
-# 
-# visNetwork(nodes, edges)
-```
-
-
-```{r, echo = FALSE}
-# DAG to show ARD response decomposition into probability estimation.
-# coord_dag = list(
-#   x = c(Node_1 = 0, Node_2 = 2),
-#   y = c(Node_1 = 3, Node_2 = 3))
-# 
-# node_8_ARD <- ggdag::dagify(Node_2 ~ Node_1, 
-#                         coords = coord_dag, 
-#                         exposure = "D", 
-#                         outcome = "Y") %>%
-#   tidy_dagitty() %>%
-#   mutate(colour = ifelse(name == "U", "Unobserved", "Observed"))
-# 
-# node_8_ARD %>%
-#   ggplot(aes(x = x, y = y, xend = xend, yend = yend)) +
-#   geom_dag_point(aes(colour = colour)) +
-#   geom_dag_edges() +
-#   geom_dag_text() +
-#   theme_dag()
-
-```
-
-
-### Bootstrapping estimates from $\hat\theta$ over many draws characterizes the latent structure such that number of groups and group status of nodes in $G^{*}$ ~ $G$.
-
 <br>
 
 <br>
@@ -488,6 +488,7 @@ visNetwork(nodes, edges)
 
 <br>
 
+# $\hat{c}$ and $\hat{c}^{\prime}$
 
 ```{r echo = FALSE}
 
