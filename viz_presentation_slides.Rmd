@@ -357,7 +357,7 @@ ARD %>%
 
 ### First, we cluster nodes into communities $\hat{c}$ and $\hat{c}^{\prime}$ based on their ***ARD*** response $y_i$.
 
-```{r, echo = FALSE}
+```{r, echo = FALSE,out.width="850.px"}
 
 knitr::include_graphics("communities.PNG")
 
@@ -371,7 +371,7 @@ knitr::include_graphics("communities.PNG")
 
 <br>
 
-```{r echo = FALSE}
+```{r echo = FALSE,out.width="850.px"}
 
 knitr::include_graphics("probability_2.png")
 
@@ -383,7 +383,7 @@ knitr::include_graphics("probability_2.png")
 
 <br>
 
-```{r echo = FALSE}
+```{r echo = FALSE,out.width="850.px"}
 
 knitr::include_graphics("probability_1.png")
 
@@ -415,7 +415,7 @@ community_fraction %>%
 
 <br>
 
-```{r, echo = FALSE}
+```{r, echo = FALSE,out.width = "600px"}
 
 knitr::include_graphics("disaggregate.PNG")
 
@@ -473,7 +473,7 @@ knitr::include_graphics("disaggregate.PNG")
 
 <br>
 
-```{r, echo = FALSE}
+```{r, echo = FALSE,out.width = "800px"}
 
 knitr::include_graphics("scaling2.png")
 
