@@ -11,9 +11,6 @@ runtime: shiny
 ```{r include=FALSE}
 library(visNetwork)
 library(igraph)
-# library(ggdag)
-# library(dagitty)
-# library(ggthemes)
 library(r2d3)
 library(kableExtra)
 library(dplyr)
@@ -52,11 +49,11 @@ The full paper can be found [here](https://arxiv.org/abs/1908.09881).
 
 # 1. What are we trying to estimate?
 
-### Suppose we want to know the ***probability*** that two nodes connect given that they are each from distinct latent communities $c$ and $c^{\prime}$ which we label as $Pcc^{\prime}$. *EXAMPLE HERE* For example, the probability that ......
+### Suppose we want to know the ***probability*** that two nodes connect given that they are each from distinct latent communities $c$ and $c^{\prime}$. We label this probability as $Pcc^{\prime}$. *EXAMPLE HERE* For example, the probability that ......
 
 ### When observable traits are associated with latent communities, researchers can use observations from ARD responses to estimate this probability. 
 
-### The remainder of this primer will illustrate the process with a concrete toy example.
+### The remainder of this primer will illustrate the process with a toy example.
 
 # 2. Generating an example network.
 
@@ -171,15 +168,15 @@ nodes = data.frame(id = 1:10,
                   # title = paste0("</b>Node </p>", 1:10)
 )
 
-edges = data.frame(from = c(1, 2, 3, 3, 4, 4, 5, 6, 6, 7, 8, 9, 10),
-                  to   = c(3, 3, 4, 5, 5, 6, 7, 2, 8, 8, 9, 10, 8))
+edges = data.frame(from = c(1, 2, 3, 3, 4, 4, 5, 6, 6, 7, 8, 9, 8),
+                  to   = c(3, 3, 4, 5, 5, 6, 7, 2, 8, 8, 9, 10, 10))
 
 visNetwork(nodes, edges)
 ```
 
-### $G$ is what a researcher would oberve if they could collect complete network data.
+### $G$ is what a researcher would oberve ***if*** they could collect complete network data.
 
-### In this example however, the researcher can only directly observe traits, not communities or edges between individual nodes. We call this observed network $G^{*}$.
+### In this example however, the researcher can only directly observe traits ***k***, not communities or edges between individual nodes. We call this ***observed network $G^{*}$***.
 
 ```{r, echo=FALSE}
 
@@ -215,7 +212,7 @@ edges = c()
 visNetwork(nodes, edges)
 ```
 
-# 3. Gathering Aggregated Relational Data (***ARD***)
+# 3. Gathering *Aggregated Relational Data* (***ARD***)
 
 ### Recall that ***ARD*** is collected by asking nodes in a network questions of the form *How many people with trait X do you know?* 
 
@@ -260,8 +257,8 @@ node = data.frame(id = 1:10,
                   shadow = TRUE
                   # title = paste0("</b>Node </p>", 1:10)
 )
-edge = data.frame(from = c(1, 2, 3, 3, 4, 4, 5, 6, 6, 7, 8, 9, 10),
-                  to   = c(3, 3, 4, 5, 5, 6, 7, 2, 8, 8, 9, 10, 8),
+edge = data.frame(from = c(1, 1, 2, 3, 3, 4, 4, 5, 6, 6, 7, 8, 9, 10),
+                  to   = c(3, 8, 3, 4, 5, 5, 6, 7, 2, 8, 8, 9, 10, 8),
                   color = "white")
 
 # how many each node knows data
@@ -305,11 +302,29 @@ server = function(input, output, session) {
 shinyApp(ui, server, options = list(height = 725))
 ```
 
-### Asking each node $i$ in $G^{*}$ how many of their neighbors have a given trait ***k***  produces a single ***ARD*** response $y_i$.
+### Asking each node $i$ in $G^{*}$ how many of their neighbors have a given trait ***k***  produces a single ***ARD*** response $y_{ik}$.
 
-### For example, node 4's ***ARD*** response, $y_4$ is two ***Triangles*** and one ***Square*** while $y_8$ is three ***Sqares*** and one ***Triangle***. 
+<br>
 
-### Aggregating all responses $y_i$ yields the following ***ARD*** table, $Y$.
+### For example, node 4 knows no ***Stars***, two ***Triangles***, and one ***Square***, so
+
+<br>
+
+<center> <font size="5">  $y_{4,Star} = 0, \;\;\;\;\;\;\;\;\;\;\; y_{4,Triangle} = 2, \;\;\;\;\;\;\;\;\;\;\; y_{4,Square} = 1$ <font> <center/>
+
+<br>
+
+### Node 8 also knows no ***Stars***, but knows one ***Triangle*** and three ***Squares***, so
+
+<br>
+
+<center> <font size="5">  $y_{8,Star} = 0, \;\;\;\;\;\;\;\;\;\;\; y_{8,Triangle} = 1, \;\;\;\;\;\;\;\;\;\;\; y_{8,Square} = 3$ <font> <center/>
+
+<br>
+
+### and so on...
+
+### Repeating this process and aggregating for all $y_{ik}$ yields the following ***ARD*** we call $Y$ below.
 
 <br>
 
@@ -321,24 +336,24 @@ ARD %>%
 
 # 4. Estimating Community Structure using ***ARD***
 
-### Now we can use ***ARD*** responses $Y$ we gathered above to estimate $\hat{P}cc^{\prime}$, the probability of connection between nodes in community $c$ and community $c^{\prime}$.
+### Now we can use ***ARD*** responses $Y$ we gathered above to estimate $\hat{P}cc^{\prime}$, the probability of connection between a node in community $c$ and node in community $c^{\prime}$.
 
-### This is a simplified version of the equation for $\hat{P}cc^{\prime}$, the details can be found on page seven of the [paper](https://arxiv.org/abs/1908.09881). 
+### Below is a simplified version of the equation for $\hat{P}cc^{\prime}$, from page seven of the [full paper](https://arxiv.org/abs/1908.09881). 
 
 <br>
 
-<center> <font size = 6> $\hat{P}cc^{\prime} = \frac{1}{nc} \sum_{i\hat{c}} \sum \frac{y_{ik} \; \mathbb{P}(community \; = \; \hat{c}^{\prime} \; | \; trait \; = \; k)}{n\hat{c}^{\prime}} \;\;\;\;\;\;\;\;\; (eq. \;1)$ <center/>
+<center> <font size = 6> $\hat{P}cc^{\prime} = \frac{1}{n\hat{c}} \sum_{i \in \hat{C}} \sum_{k} \frac{y_{ik} \; \mathbb{P}(community \; = \; \hat{c}^{\prime} \; | \; trait \; = \; k)}{n\hat{c}^{\prime}} \;\;\;\;\;\;\;\;\; (eq. \;1)$ <center/>
 
 ### where 
-### $\hat{P}cc^{\prime}$ is the estimated connection probability between a node in $c$ and a node in $c^{\prime}
-### $n\hat{c}$ is the sample size of surveyed nodes in estimated community $\hat{c}$ 
-### $i\hat{c}$ identifies a specific node estimated to be in estimated community $\hat{c}$
-### $y_{ik}$ is the ARD response from node $i$ with trait $k$
+### $\hat{P}cc^{\prime}$ is the estimated connection probability between a node in $c$ and a node in $c^{\prime}$,
+### $n\hat{c}$ is the sample size of surveyed nodes in estimated community $\hat{c}$,
+### $y_{ik}$ is the ARD response from node $i$ with trait $k$,
+### $\mathbb{P}(community \; = \; \hat{c}^{\prime} \; | \; trait \; = \; k)$ is the probability of trait $k$ in community $\hat{c}^{\prime}$,
 ### $n\hat{c}^{\prime}$ is the total size of estimated community $\hat{c}^{\prime}$
 
 <br>
 
-### Now let's estimate $\hat{P}cc^{\prime}$ using our example ARD data $Y$.
+### Now we can compute $\hat{P}cc^{\prime}$ using our example ARD data $Y$.
 
 ### First, we cluster nodes into communities $\hat{c}$ and $\hat{c}^{\prime}$ based on their ***ARD*** response $y_i$.
 
@@ -350,14 +365,42 @@ knitr::include_graphics("communities.PNG")
 
 ### There are many methods researchers could use for this clustering, but for this example we simply put ***Triangles*** together into $\hat{c}$, ***Squares*** together into $\hat{c}^{\prime}$, and one ***Star*** in each at random since there are only two. 
 
-### Then we calculate the fraction of each trait in each community. So in our example we have
+### Then we calculate the fraction of each trait in each community. 
+
+### So in our example we have $\hat{c}$
+
+<br>
+
+```{r echo = FALSE}
+
+knitr::include_graphics("probability_2.png")
+
+```
+
+<br>
+
+### and $\hat{c}^{\prime}$
+
+<br>
+
+```{r echo = FALSE}
+
+knitr::include_graphics("probability_1.png")
+
+```
+
+<br>
+
+### Tabulated percentages:
+
+<br>
 
 ```{r, echo = FALSE}
 
-community_fraction = data.frame(C1 = c("20%", "0%", "80%"),
-                                C2 = c("20%", "80%", "0%"))
+community_fraction = data.frame(C1 = c("20%", "50%", "0%"),
+                                C2 = c("20%", "0%", "80%"))
 names(community_fraction) <- c("$\\hat{c}$", "$\\hat{c}^{\\prime}$")
-rownames(community_fraction) = c("Star", "Square", "Triangle")
+rownames(community_fraction) = c("Star", "Triangle", "Square")
 
 community_fraction %>%
   kbl() %>%
@@ -366,7 +409,11 @@ community_fraction %>%
                 position = "center")
 ```
 
-### Then we take ARD responses $y_i$ and disaggregate by each trait $k$ into $y_{ik}$. 
+<br>
+
+### Next we take ARD responses $y_i$ and disaggregate by each trait $k$ into $y_{ik}$. 
+
+<br>
 
 ```{r, echo = FALSE}
 
@@ -376,15 +423,15 @@ knitr::include_graphics("disaggregate.PNG")
 
 <br>
 
-### Let's work through the calculation $\sum \frac{y_{ik} \; \mathbb{P}(community \; = \; \hat{c}^{\prime} \; | \; trait \; = \; k)}{n\hat{c}^{\prime}}$ for one node, $y_8$. 
+### Let's consider how we compute $\sum_{k} \frac{y_{ik} \; \mathbb{P}(community \; = \; \hat{c}^{\prime} \; | \; trait \; = \; k)}{n\hat{c}^{\prime}}$ for node $y_8$. 
 
 <br>
 
-### $y_8$ knows one ***Triangle*** and three ***Squares***, so we have 
+### Recall that from $Y$, we have the following $y_{ik}'s$
 
 <br>
 
-<center> <font size = 5> $y_{8Triangle} = 1, \;\;\;\;\;\;\;\;\;\;\; y_{8Square} = 3$. <font> </center>
+<center> <font size = 5> $y_{8,Star} = 0, \;\;\;\;\;\;\;\;\;\;\; y_{8,Triangle} = 1, \;\;\;\;\;\;\;\;\;\;\; y_{8,Square} = 3$ <font> </center>
 
 ### Because there are 5 nodes each in $n\hat{c}$ and $n\hat{c}^{\prime}$ and we surveyed all nodes, 
 
@@ -396,103 +443,124 @@ knitr::include_graphics("disaggregate.PNG")
 
 <br>
 
-<center> <font size = 5> $\mathbb{P}(community \; = \; \hat{c}^{\prime} \; | \; trait \; = \; Triangle) = 0.8$ <font> </center>
+<center> <font size = 5> $\mathbb{P}(community \; = \; \hat{c}^{\prime} \; | \; trait \; = \; Star) = 0.2$ <font> </center>
 
 <br>
 
-<center> <font size = 5> $\mathbb{P}(community \; = \; \hat{c}^{\prime} \; | \; trait \; = \; Square)  \;\;= 0.2$<font> </center>
-
-### Substituting into 
+<center> <font size = 5> $\mathbb{P}(community \; = \; \hat{c}^{\prime} \; | \; trait \; = \; Triangle) = 0$ <font> </center>
 
 <br>
 
-<center> <font size = 5> $\frac{y_{ik} \; \mathbb{P}(community \; = \; \hat{c}^{\prime} \; | \; trait \; = \; k)}{n\hat{c}^{\prime}} \;\; gives \;\; \frac{y_{8Triangle} \; * \; \mathbb{P}(community \; = \; \hat{c}^{\prime} \; | \; trait \; = \; k)}{n\hat{c}^{\prime}}$ <font> </center>
+<center> <font size = 5> $\mathbb{P}(community \; = \; \hat{c}^{\prime} \; | \; trait \; = \; Square)  \;\;= 0.8$<font> </center>
 
-<center> <font size = 5> $\frac{1 \; * \; 0.2}{5} = 0.04$ <center/>
+<br>
 
-### For $y_{8Square}, we compute 
+### For $i$ = 8 and $k$ = ***Star***,
 
-<center> <font size = 5> $\frac{3 \; * \; 0.8}{5} = 0.48$ <center/>
+<br>
 
-### 
+<center> <font size = 5> $\frac{y_{8, Star} \; * \; \mathbb{P}(community \; = \; \hat{c}^{\prime} \; | \; trait \; = \; Star)}{n\hat{c}^{\prime}} = \frac{0 \; * \; 0.2}{5} = 0$ <font> </center>
 
+### For $i$ = 8 and $k$ = ***Triangle***,
 
+<br>
 
+<center> <font size = 5> $\frac{y_{8, Triangle} \; * \; \mathbb{P}(community \; = \; \hat{c}^{\prime} \; | \; trait \; = \; Triangle)}{n\hat{c}^{\prime}} = \frac{1 \; * \; 0}{5} = 0$ <font> </center>
 
+<br>
 
+### And for $i$ = 8 and $k$ = ***Square***, 
 
-### We use this fraction to estimate latent group status for all of the nodes in the graph. 
+<br>
 
-```{r, echo=FALSE}
+```{r, echo = FALSE}
 
-#dataset
-nodes = data.frame(id = 1:10,
-                  label = as.character(1:10),
-                  shape = c("star", 
-                            "triangle",
-                            "triangle", 
-                            "triangle",
-                            "square", 
-                            "triangle",
-                            "square", 
-                            "star",
-                            "square", 
-                            "square"),
-                  size = c(35,
-                           30,
-                           30,
-                           30,
-                           30,
-                           30,
-                           30,
-                           35,
-                           30,
-                           30), 
-                  font.size = 25,
-                  align = "center",
-                  group = c(rep("tomato", 5), 
-                            rep("Gold", 5)),
-                  borderWidth = 2,
-                  color.background = c(rep("tomato", 5), 
-                                       rep("gold", 5)),
-                  color.border = "black",
-                  color.highlight.background = c(rep("tomato", 5), 
-                                                 rep("gold", 5)),
-                  color.highlight.border = "black",
-                  shadow = TRUE
-                  # title = paste0("</b>Node </p>", 1:10)
-)
+knitr::include_graphics("scaling.png")
 
-edges = data.frame(from = c(1, 2, 3, 3, 4, 4, 5, 6, 6, 7, 8, 9, 10),
-                  to   = c(3, 3, 4, 5, 5, 6, 7, 2, 8, 8, 9, 10, 8))
-
-visNetwork(nodes, edges)
 ```
 
+<br>
 
-### Remember how we assumed that observable ***traits*** are associated with latent group membership? We can use this assumption to take the ***ARD*** responses to classify group status for each node $i$. 
-
-### For example, if ***ARD*** response $y_i$ knows multiple squares, node $i$ is probably part in the ***Yellow*** community. On the other hand, if $y_i$ knows multiple triangles, node $i$ probably belongs to ***Red***.
-
-### $Y$ is used to fit a model, $\hat\theta$, which detects the number of latent groups and classifies latent group membership for each node in $G^{*}$.
+### dividing by $n\hat{c}^{\prime} = 5$ gives
 
 <br>
 
-<br>
+<center> <font size = 5> $\frac{y_{8, Square} \; * \; \mathbb{P}(community \; = \; \hat{c}^{\prime} \; | \; trait \; = \; Square)}{n\hat{c}^{\prime}} = \frac{3 \; * \; 0.8}{5} = 0.48$ <center/>
 
 <br>
 
-<br>
+### Then we take the sum of each computed $\frac{y_{ik} \; \mathbb{P}(community \; = \; \hat{c}^{\prime} \; | \; trait \; = \; k)}{n\hat{c}^{\prime}}$ for each trait $k$. 
+
+### So for $y_8$, $\sum_{k} \frac{y_{8k} \; \mathbb{P}(community \; = \; \hat{c}^{\prime} \; | \; trait \; = \; k)}{n\hat{c}^{\prime}} = 0 + 0 + 0.48 = 0.48$
+
+### Finally, to calculate $\hat{P}cc^{\prime}$, we do the above calculation for each node $i \in \hat{c}$ and sum over the sample size of $\hat{c}$, n$\hat{c}$. 
 
 <br>
 
-<br>
+```{r echo=FALSE}
+Y = data.frame(rbind(c(0, 1, 0),
+                       c(0, 2, 0),
+                       c(1, 2, 1),
+                       c(0, 2, 1),
+                       c(0, 2, 1),
+                       c(1, 2, 0),
+                       c(1, 0, 1),
+                       c(0, 1, 3),
+                       c(1, 0, 1),
+                       c(1, 0, 1)))
+colnames(Y) = c("Star", "Triangle", "Square")
+Y = as.matrix(Y)
 
-# $\hat{c}$ and $\hat{c}^{\prime}$
+hat_c_prime = c(0.2, 0, 0.8)
 
-```{r echo = FALSE}
+result = Y%*%hat_c_prime
+result_scaled = result/5
 
+results = data.frame(Node = c(2,3,4,6,8),
+                     Probability = c(result_scaled[2],
+                                     result_scaled[3],
+                                     result_scaled[4],
+                                     result_scaled[6],
+                                     result_scaled[8])
+                     )
+
+names(results) = c("$i \\in \\hat{c}$", "$Probability$")
+
+results %>%
+  kbl() %>%
+  kable_styling(bootstrap_options = c("striped", "hover"), 
+                full_width = FALSE,
+                position = "center")
 ```
+
+<br>
+
+### In our toy example, we estimate $\hat{P}cc^{\prime} = \frac{1}{5} \; (0 + 0.20 + 0.16 + 0.04 + 0.48) = 0.176$
+
+### Fraction of $\hat{c}$ for each trait $k$:
+
+### $k$ =  ***Star***
+
+### $k$ = ***Triangle***
+
+### $k$ = ***Square***
+
+### $\frac{4}{5} = 0.8$
+
+<br> 
+
+
+<br>
+
+<br>
+
+<br>
+
+<br>
+
+<br>
+
+<br>
 
 
 
