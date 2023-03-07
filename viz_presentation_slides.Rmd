@@ -355,7 +355,9 @@ ARD %>%
 
 ### Now we can compute $\hat{P}cc^{\prime}$ using our example ARD data $Y$.
 
-### First, we cluster nodes into communities $\hat{c}$ and $\hat{c}^{\prime}$ based on their ***ARD*** response $y_i$.
+### First, we use k-means clustering to classify nodes into communities $\hat{c}$ and $\hat{c}^{\prime}$ based on their ***ARD*** responses $y_{ik}$. 
+
+### In our example, since ***Triangles*** know mostly other ***Triangles***, they get clustered together while ***Stars*** don't know other ***Stars***, so they are not clustered together. 
 
 ```{r, echo = FALSE,out.width="850.px"}
 
@@ -363,9 +365,9 @@ knitr::include_graphics("communities.PNG")
 
 ```
 
-### There are many methods researchers could use for this clustering, but for this example we simply put ***Triangles*** together into $\hat{c}$, ***Squares*** together into $\hat{c}^{\prime}$, and one ***Star*** in each at random since there are only two. 
+### Refer to page seven of our [full paper](https://arxiv.org/abs/1908.09881) for details about our proposed clustering algorithm.
 
-### Then we calculate the fraction of each trait in each community. 
+### Once we have assigned nodes to communities $\hat{c}$ and $\hat{c}^{\prime}$, we calculate the fraction of each trait in each community. 
 
 ### So in our example we have $\hat{c}$
 
@@ -491,7 +493,11 @@ knitr::include_graphics("scaling2.png")
 
 ### Then we take the sum of each computed $\frac{y_{ik} \; \mathbb{P}(community \; = \; \hat{c}^{\prime} \; | \; trait \; = \; k)}{n\hat{c}^{\prime}}$ for each trait $k$. 
 
+<br>
+
 ### So for $y_8$, $\sum_{k} \frac{y_{8k} \; \mathbb{P}(community \; = \; \hat{c}^{\prime} \; | \; trait \; = \; k)}{n\hat{c}^{\prime}} = 0 + 0 + 0.48 = 0.48$
+
+<br>
 
 ### Finally, to calculate $\hat{P}cc^{\prime}$, we do the above calculation for each node $i \in \hat{c}$ and sum over the sample size of $\hat{c}$, n$\hat{c}$. 
 
@@ -537,13 +543,15 @@ results %>%
 
 ### In our toy example, we estimate $\hat{P}cc^{\prime} = \frac{1}{5} \; (0 + 0.20 + 0.16 + 0.04 + 0.48) = 0.176$
 
-### Fraction of $\hat{c}$ for each trait $k$:
+```{r echo=FALSE}
+### Fraction of $\hat{c}$ for each trait $k$
 
 ### $k$ =  ***Star***
 
 ### $k$ = ***Triangle***
 
 ### $k$ = ***Square***
+```
 
 <br> 
 
