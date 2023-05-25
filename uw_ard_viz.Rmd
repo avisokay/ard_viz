@@ -18,6 +18,8 @@ library(shiny)
 library(tidyverse)
 library(shinythemes)
 library(DT)
+library(png)
+library(magick)
 ```
 
 <br>
@@ -61,17 +63,21 @@ The full paper can be found [here](https://arxiv.org/abs/1908.09881).
 
 ### Each node is randomly assigned to one of two communities, $c$ (***Red***) or $c^{\prime}$ (***Gold***).
 ```{r}
-path_to_images <- "C:/Users/Adam/Desktop/code_projects/Github/ard_viz/"
- 
-nodes <- data.frame(id = 1:4, 
-                    shape = 'image',
-                    image = paste(path_to_images, c('uw.png', 'uw.png', 'wsu.png', 'wsu.png')))
-  
-edges <- data.frame(from = c(2,4,3,3), to = c(1,2,4,2))
-
-visNetwork(nodes, edges, width = "100%") %>% 
-  visNodes(shapeProperties = list(useBorderWithImage = TRUE)) %>%
-  visLayout(randomSeed = 2)
+# uw = "https://raw.githubusercontent.com/avisokay/ard_viz/master/uw.png"
+# wsu = "https://raw.githubusercontent.com/avisokay/ard_viz/master/wsu.png"
+# 
+# nodes <- data.frame(id = 1:4, 
+#                     shape = "image",
+#                     image = c(uw, uw, wsu, wsu),
+#                     label = "I'm an image")
+#   
+# edges <- data.frame(from = c(2,4,3,3), to = c(1,2,4,2))
+# 
+# head(nodes)
+# 
+# visNetwork(nodes, edges, width = "100%") %>% 
+#   visNodes(shapeProperties = list(useBorderWithImage = FALSE)) %>%
+#   visLayout(randomSeed = 2)
 ```
 
 
@@ -82,7 +88,8 @@ visNetwork(nodes, edges, width = "100%") %>%
 #dataset
 nodes = data.frame(id = 1:10,
                   label = as.character(1:10),
-                  shape = "dot",
+                  shape = "image",
+                  image = c(uw, wsu),
                   size = 30, 
                   font.size = 25,
                   align = "center",
@@ -95,7 +102,7 @@ nodes = data.frame(id = 1:10,
                   color.highlight.background = c(rep("tomato", 5), 
                                                  rep("gold", 5)),
                   color.highlight.border = "black",
-                  shadow = TRUE
+                  shadow = FALSE
                   # title = paste0("</b>Node </p>", 1:10)
 )
 
