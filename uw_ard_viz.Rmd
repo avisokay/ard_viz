@@ -60,6 +60,20 @@ The full paper can be found [here](https://arxiv.org/abs/1908.09881).
 ### Let's begin by generating a network of 10 nodes. 
 
 ### Each node is randomly assigned to one of two communities, $c$ (***Red***) or $c^{\prime}$ (***Gold***).
+```{r}
+path_to_images <- "C:/Users/Adam/Desktop/code_projects/Github/ard_viz"
+ 
+nodes <- data.frame(id = 1:4, 
+                    shape = 'image',
+                    image = paste(path_to_images, c('uw.jpg', 'uw.jpg', 'wsu.jpg', 'wsu.jpg')))
+  
+edges <- data.frame(from = c(2,4,3,3), to = c(1,2,4,2))
+
+visNetwork(nodes, edges, width = "100%") %>% 
+  visNodes(shapeProperties = list(useBorderWithImage = TRUE)) %>%
+  visLayout(randomSeed = 2)
+```
+
 
 ```{r, echo=FALSE}
 # images as nodes
