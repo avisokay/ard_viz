@@ -88,7 +88,7 @@ The full paper can be found [here](https://arxiv.org/abs/1908.09881).
 
 uw = "https://raw.githubusercontent.com/avisokay/ard_viz/master/uw.png"
 wsu = "https://raw.githubusercontent.com/avisokay/ard_viz/master/wsu.png"
-gu = "https://raw.githubusercontent.com/avisokay/ard_viz/master/gonzaga.png"
+gu = "https://raw.githubusercontent.com/avisokay/ard_viz/master/gu.png"
 
 #dataset
 nodes = data.frame(id = 1:10,
@@ -98,14 +98,11 @@ nodes = data.frame(id = 1:10,
                   size = 30, 
                   font.size = 25,
                   align = "center",
-                  group = c(rep("red", 5), 
-                            rep("purple", 5)),
                   borderWidth = 2,
-                  color.background = c(rep("red", 5), 
-                                       rep("purple", 5)),
+                  color.background = c(rep("tomato", 5), 
+                                       rep("gold", 5)),
                   color.border = "black",
-                  color.highlight.background = c(rep("red", 5), 
-                                                 rep("purple", 5)),
+                  color.highlight.background = "black",
                   color.highlight.border = "black",
                   shadow = FALSE
                   # title = paste0("</b>Node </p>", 1:10)
