@@ -61,26 +61,41 @@ The full paper can be found [here](https://arxiv.org/abs/1908.09881).
 
 ### Let's begin by generating a network of 10 nodes. 
 
-### Each node is randomly assigned to one of two communities, $c$ (***Red***) or $c^{\prime}$ (***Gold***).
-```{r}
-# uw = "https://raw.githubusercontent.com/avisokay/ard_viz/master/uw.png"
-# wsu = "https://raw.githubusercontent.com/avisokay/ard_viz/master/wsu.png"
-# gu = "https://raw.githubusercontent.com/avisokay/ard_viz/master/gu.png"
-# 
-# nodes <- data.frame(id = 1:4, 
-#                     shape = "image",
-#                     image = c(uw, uw, wsu, wsu),
-#                     label = "I'm an image")
-#   
-# edges <- data.frame(from = c(2,4,3,3), to = c(1,2,4,2))
-# 
-# head(nodes)
-# 
-# visNetwork(nodes, edges, width = "100%") %>% 
-#   visNodes(shapeProperties = list(useBorderWithImage = FALSE)) %>%
-#   visLayout(randomSeed = 2)
+### Each node is randomly assigned to one of two communities: $c$, designated by the color (***Lavender***) or $c^{\prime}$, designated by the color (***Pink***).
+```{r, echo=FALSE}
+# images as nodes
+# https://datastorm-open.github.io/visNetwork/image_icon.html
+
+set.seed(123)
+
+#dataset
+nodes = data.frame(id = 1:10,
+                  label = as.character(1:10),
+                  shape = "dot",
+                  size = 40, 
+                  font.size = 25,
+                  align = "center",
+                  borderWidth = 2,
+                  color.background = c(rep("lavender", 5), 
+                                       rep("pink", 5)),
+                  color.border = "black",
+                  color.highlight.background = "gold",
+                  color.highlight.border = "black",
+                  shadow = TRUE
+                  # title = paste0("</b>Node </p>", 1:10)
+)
+
+edges = c()
+
+visNetwork(nodes, edges)
 ```
 
+### Next, let's assign a school mascot trait $k$ to each node; either a ***Husky***, ***Cougar***, or a ***Bulldog***. In practice, these traits could be other observable characteristics such as age, education, health status, etc.
+
+### ***We assume that traits are associated with community, but not perfectly correlated.***  
+<center> <font size="5">  (remember this for later) <font> <center/>
+
+### For this example, a node is more likely to be a ***Husky*** if it is in the ***Lavender*** community, more likely to be a ***Cougar*** if it is in the ***Pink*** community, and equally likely to be a ***Bulldog*** regardless of community.
 
 ```{r, echo=FALSE}
 # images as nodes
@@ -94,61 +109,17 @@ gu = "https://raw.githubusercontent.com/avisokay/ard_viz/master/gu.png"
 nodes = data.frame(id = 1:10,
                   label = as.character(1:10),
                   shape = "circularImage",
-                  image = c(uw, wsu, gu, wsu, uw),
-                  size = 30, 
+                  image = c(gu, uw, uw, uw, wsu, uw, wsu, gu, wsu, wsu),
+                  size = 40,
                   font.size = 25,
                   align = "center",
                   borderWidth = 2,
-                  color.background = c(rep("tomato", 5), 
-                                       rep("gold", 5)),
+                  color.background = c(rep("lavender", 5), 
+                                       rep("pink", 5)),
                   color.border = "black",
-                  color.highlight.background = "black",
+                  color.highlight.background = "gold",
                   color.highlight.border = "black",
                   shadow = FALSE
-                  # title = paste0("</b>Node </p>", 1:10)
-)
-
-edges = c()
-
-visNetwork(nodes, edges)
-```
-
-### Next, let's assign a shape trait $k$ to each node; either a ***Triangle***, ***Square***, or a ***Star***. In practice, these traits would be age, education, health status, etc.
-
-### ***We assume that traits are associated with community, but not perfectly correlated.***  
-<center> <font size="5">  (remember this for later) <font> <center/>
-
-### For this example, a node is more likely to be a ***Square*** if it is in the ***Gold*** community, more likely to be a ***Triangle*** if it is in the ***Red*** community, and equally likely to be a ***Star*** regardless of community.  
-
-```{r, echo=FALSE}
-
-#dataset
-nodes = data.frame(id = 1:10,
-                  label = as.character(1:10),
-                  shape = c("star", 
-                            "triangle",
-                            "triangle", 
-                            "triangle",
-                            "square", 
-                            "triangle",
-                            "square", 
-                            "star",
-                            "square", 
-                            "square"),
-                  image = c(uw),
-                  size = 30, 
-                  font.size = 25,
-                  align = "center",
-                  group = c(rep("tomato", 5), 
-                            rep("Gold", 5)),
-                  borderWidth = 2,
-                  color.background = c(rep("tomato", 5), 
-                                       rep("Gold", 5)),
-                  color.border = "black",
-                  color.highlight.background = c(rep("tomato", 5), 
-                                                 rep("gold", 5)),
-                  color.highlight.border = "black",
-                  shadow = TRUE
                   # title = paste0("</b>Node </p>", 1:10)
 )
 
@@ -165,35 +136,6 @@ visNetwork(nodes, edges)
 
 ```{r, echo=FALSE}
 
-#dataset
-nodes = data.frame(id = 1:10,
-                  label = as.character(1:10),
-                  shape = c("star", 
-                            "triangle",
-                            "triangle", 
-                            "triangle",
-                            "square", 
-                            "triangle",
-                            "square", 
-                            "star",
-                            "square", 
-                            "square"),
-                  size = 30, 
-                  font.size = 25,
-                  align = "center",
-                  group = c(rep("tomato", 5), 
-                            rep("Gold", 5)),
-                  borderWidth = 2,
-                  color.background = c(rep("tomato", 5), 
-                                       rep("Gold", 5)),
-                  color.border = "black",
-                  color.highlight.background = c(rep("tomato", 5), 
-                                                 rep("gold", 5)),
-                  color.highlight.border = "black",
-                  shadow = TRUE
-                  # title = paste0("</b>Node </p>", 1:10)
-)
-
 edges = data.frame(from = c(1, 2, 3, 3, 4, 4, 5, 6, 6, 7, 8, 9, 8),
                   to   = c(3, 3, 4, 5, 5, 6, 7, 2, 8, 8, 9, 10, 10))
 
@@ -207,31 +149,7 @@ visNetwork(nodes, edges)
 ```{r, echo=FALSE}
 
 #dataset
-nodes = data.frame(id = 1:10,
-                  label = as.character(1:10),
-                  shape = c("star", 
-                            "triangle",
-                            "triangle", 
-                            "triangle",
-                            "square", 
-                            "triangle",
-                            "square", 
-                            "star",
-                            "square", 
-                            "square"),
-                  size = 30, 
-                  font.size = 25,
-                  align = "center",
-                  group = c(rep("tomato", 5), 
-                            rep("Gold", 5)),
-                  borderWidth = 2,
-                  color.background = "slategrey",
-                  color.border = "black",
-                  color.highlight.background = "slategrey",
-                  color.highlight.border = "black",
-                  shadow = TRUE
-                  # title = paste0("</b>Node </p>", 1:10)
-)
+nodes$color.background = "white"
 
 edges = c()
 
@@ -249,43 +167,25 @@ visNetwork(nodes, edges)
 
 ```{r, echo=FALSE}
 #dataset
-node = data.frame(id = 1:10,
+nodes = data.frame(id = 1:10,
                   label = as.character(1:10),
-                  shape = c("star", 
-                            "triangle",
-                            "triangle", 
-                            "triangle",
-                            "square", 
-                            "triangle",
-                            "square", 
-                            "star",
-                            "square", 
-                            "square"),
-                  size = c(35,
-                           30,
-                           30,
-                           30,
-                           30,
-                           30,
-                           30,
-                           35,
-                           30,
-                           30), 
+                  shape = "circularImage",
+                  image = c(gu, uw, uw, uw, wsu, uw, wsu, gu, wsu, wsu),
+                  size = 40,
                   font.size = 25,
                   align = "center",
-                  # group = c(rep("tomato", 5), 
-                  #           rep("Gold", 5)),
                   borderWidth = 2,
-                  color.background = "slategrey",
+                  color.background = c(rep("lavender", 5), 
+                                       rep("pink", 5)),
                   color.border = "black",
-                  color.highlight.background = "slategrey",
+                  color.highlight.background = "gold",
                   color.highlight.border = "black",
-                  shadow = TRUE
+                  shadow = FALSE
                   # title = paste0("</b>Node </p>", 1:10)
 )
-edge = data.frame(from = c(1, 2, 3, 3, 4, 4, 5, 6, 6, 7, 8, 9, 10),
-                  to   = c(3, 3, 4, 5, 5, 6, 7, 2, 8, 8, 9, 10, 8),
-                  color = "white")
+
+edges = data.frame(from = c(1, 2, 3, 3, 4, 4, 5, 6, 6, 7, 8, 9, 10),
+                  to   = c(3, 3, 4, 5, 5, 6, 7, 2, 8, 8, 9, 10, 8))
 
 # how many each node knows data
 ARD = data.frame(rbind(c(1, 0, 1, 0),
@@ -306,7 +206,7 @@ ui = fluidPage(
 server = function(input, output, session) {
   # highlight selected node and contacts
   output$network_proxy = renderVisNetwork({
-    visNetwork(node, edge) %>%
+    visNetwork(nodes, edges) %>%
       visOptions(highlightNearest=TRUE) %>%
       
       visEvents(select = "function(nodes) {
