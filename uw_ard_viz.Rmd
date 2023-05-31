@@ -65,7 +65,7 @@ The full paper can be found [here](https://arxiv.org/abs/1908.09881).
 ```{r}
 # uw = "https://raw.githubusercontent.com/avisokay/ard_viz/master/uw.png"
 # wsu = "https://raw.githubusercontent.com/avisokay/ard_viz/master/wsu.png"
-# gonzaga = "https://raw.githubusercontent.com/avisokay/ard_viz/master/gonzaga.png"
+# gu = "https://raw.githubusercontent.com/avisokay/ard_viz/master/gu.png"
 # 
 # nodes <- data.frame(id = 1:4, 
 #                     shape = "image",
@@ -88,24 +88,24 @@ The full paper can be found [here](https://arxiv.org/abs/1908.09881).
 
 uw = "https://raw.githubusercontent.com/avisokay/ard_viz/master/uw.png"
 wsu = "https://raw.githubusercontent.com/avisokay/ard_viz/master/wsu.png"
-gonzaga = "https://raw.githubusercontent.com/avisokay/ard_viz/master/gonzaga.png"
+gu = "https://raw.githubusercontent.com/avisokay/ard_viz/master/gonzaga.png"
 
 #dataset
 nodes = data.frame(id = 1:10,
                   label = as.character(1:10),
                   shape = "circularImage",
-                  image = c(uw, wsu, gonzaga, wsu, uw),
+                  image = c(uw, wsu, gu, wsu, uw),
                   size = 30, 
                   font.size = 25,
                   align = "center",
-                  group = c(rep("tomato", 5), 
-                            rep("Gold", 5)),
+                  group = c(rep("red", 5), 
+                            rep("purple", 5)),
                   borderWidth = 2,
-                  color.background = c(rep("tomato", 5), 
-                                       rep("Gold", 5)),
+                  color.background = c(rep("red", 5), 
+                                       rep("purple", 5)),
                   color.border = "black",
-                  color.highlight.background = c(rep("tomato", 5), 
-                                                 rep("gold", 5)),
+                  color.highlight.background = c(rep("red", 5), 
+                                                 rep("purple", 5)),
                   color.highlight.border = "black",
                   shadow = FALSE
                   # title = paste0("</b>Node </p>", 1:10)
