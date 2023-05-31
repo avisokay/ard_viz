@@ -65,6 +65,7 @@ The full paper can be found [here](https://arxiv.org/abs/1908.09881).
 ```{r}
 # uw = "https://raw.githubusercontent.com/avisokay/ard_viz/master/uw.png"
 # wsu = "https://raw.githubusercontent.com/avisokay/ard_viz/master/wsu.png"
+# gonzaga = "https://raw.githubusercontent.com/avisokay/ard_viz/master/gonzaga.png"
 # 
 # nodes <- data.frame(id = 1:4, 
 #                     shape = "image",
@@ -85,11 +86,15 @@ The full paper can be found [here](https://arxiv.org/abs/1908.09881).
 # images as nodes
 # https://datastorm-open.github.io/visNetwork/image_icon.html
 
+uw = "https://raw.githubusercontent.com/avisokay/ard_viz/master/uw.png"
+wsu = "https://raw.githubusercontent.com/avisokay/ard_viz/master/wsu.png"
+gonzaga = "https://raw.githubusercontent.com/avisokay/ard_viz/master/gonzaga.png"
+
 #dataset
 nodes = data.frame(id = 1:10,
                   label = as.character(1:10),
-                  shape = "image",
-                  image = c(uw, wsu),
+                  shape = "circularImage",
+                  image = c(uw, wsu, gonzaga, wsu, uw),
                   size = 30, 
                   font.size = 25,
                   align = "center",
@@ -133,6 +138,7 @@ nodes = data.frame(id = 1:10,
                             "star",
                             "square", 
                             "square"),
+                  image = c(uw),
                   size = 30, 
                   font.size = 25,
                   align = "center",
