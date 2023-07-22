@@ -5,7 +5,9 @@ account: avisokay
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 8918702
-bundleId: 7119402
+bundleId: 7484059
 url: https://avisokay.shinyapps.io/viz_presentation_slides/
-when: 1682102596.43367
-lastSyncTime: 1682102596.43368
+when: 1689972709.8692
+lastSyncTime: 1689972709.86922
+asMultiple: FALSE
+asStatic: FALSE

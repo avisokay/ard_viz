@@ -24,8 +24,10 @@ library(magick)
 
 <br>
 
-# Consistently estimating network statistics using *Aggregated Relational Data* (***ARD***): A Primer
-The full paper can be found [here](https://arxiv.org/abs/1908.09881).
+# Consistently estimating network statistics using *Aggregated Relational Data* (***ARD***)
+#### Breza, Chandrasekhar, Lubold, McCormick, Pan
+
+#### The full paper can be found [here](https://arxiv.org/abs/1908.09881).
 
 <br>
 
@@ -39,7 +41,7 @@ The full paper can be found [here](https://arxiv.org/abs/1908.09881).
 
 ### ***ARD*** offers a cheaper alternative to researchers who cannot otherwise acquire network data.
 
-### To collect ***ARD***, a researcher asks respondents questions of the form:
+### To collect ***ARD***, a researcher asks questions of the form:
 
 <br>
 
@@ -55,13 +57,21 @@ The full paper can be found [here](https://arxiv.org/abs/1908.09881).
 
 ### The remainder of this primer will illustrate the process with a toy example.
 
+<br>
+
 <center> <font size="5">  ***Washington College Students and Color Preferences: Lavender or Pink?*** </font>  </center>
+
+<br>
+
+### In this simplified example, we have students of three different schools and two different colors. Our goal is to estimate the probability that a given student prefers ***Lavender*** or ***Pink***. The best way to answer this question would be to simply survey each student and ask them their color preference. But in this example, we assume that we cannot ask directly about color preferences. But we can collect data about the network, and combine that with the assumption that color preferences are associated with where students choose to study. 
 
 <br>
 
 ### First we begin by generating a network of 10 students (nodes). 
 
-### Each node is randomly assigned to one of two communities: ***Lavender*** or ***Pink***. These colors denote each nodes color preference. 
+### Each node is randomly assigned to one of two communities: ***Lavender*** or ***Pink***.
+
+<center>
 ```{r, echo=FALSE}
 # images as nodes
 # https://datastorm-open.github.io/visNetwork/image_icon.html
@@ -89,11 +99,15 @@ edges = c()
 
 visNetwork(nodes, edges)
 ```
+</center>
 
-### Next, let's assign a school mascot trait $k$ to each node. ***We assume that node (student) traits (school) are associated with community (color preference), but not perfectly correlated.***  For this example, let's assume each node is either a ***UW Husky***, a ***WSU Cougar***, or a ***Gonzaga Bulldog***. In practice, these traits could be other observable characteristics such as age, education, health status, etc.
+### Next, let's assign a school mascot trait $k$ to each node. ***We assume that node (student) traits (school) are associated with community (color preference), but not perfectly correlated.***  
+
+### For this example, let's assume each node is either a ***UW Husky***, a ***WSU Cougar***, or a ***Gonzaga Bulldog***. In practice, these traits could be other observable characteristics such as age, education, health status, etc.
 
 ### A node that prefers ***Lavender*** is more likely to be a ***Husky***, ***Pink*** nodes are more likely to be ***Cougars***, and nodes that are indifferent are most likely to be ***Bulldogs***.
 
+<center>
 ```{r, echo=FALSE}
 # images as nodes
 # https://datastorm-open.github.io/visNetwork/image_icon.html
@@ -124,6 +138,7 @@ edges = c()
 
 visNetwork(nodes, edges)
 ```
+</center>
 
 ### Finally, we assume there is ***community homophily*** in this network, such that the ***probability*** of node $i$ knowing node $j$ (denoted as $p_{ij}$), is ***greater*** if $i$ and $j$ are in the ***same community***. 
 
@@ -131,6 +146,7 @@ visNetwork(nodes, edges)
 
 ### Now that we have generated nodes with color preferences, assigned school mascot traits $k$, and formed edges, we will call this ***complete network $G$***. 
 
+<center>
 ```{r, echo=FALSE}
 
 edges = data.frame(from = c(1, 2, 3, 3, 4, 4, 5, 6, 6, 7, 8, 9, 8),
@@ -138,11 +154,13 @@ edges = data.frame(from = c(1, 2, 3, 3, 4, 4, 5, 6, 6, 7, 8, 9, 8),
 
 visNetwork(nodes, edges)
 ```
+</center>
 
 ### $G$ is what a researcher would oberve ***if*** they could collect ***complete*** network data.
 
-### In this example however, the researcher can only directly observe traits ***k***, not color preferences or edges between individual nodes. We call this ***observed network $G^{*}$***.
+### In this example however, the researcher can only directly observe trait ***k*** (school), not color preferences or edges between individual nodes. We call this ***observed network $G^{*}$***.
 
+<center>
 ```{r, echo=FALSE}
 
 #dataset
@@ -152,6 +170,7 @@ edges = c()
 
 visNetwork(nodes, edges)
 ```
+</center>
 
 # 3. Gathering *Aggregated Relational Data* (***ARD***)
 
@@ -162,6 +181,7 @@ visNetwork(nodes, edges)
 <br> 
 <center> <font size="5">  ***Click on a node to see each who it knows!*** </font>  </center>
 
+<center>
 ```{r, echo=FALSE}
 #dataset
 nodes = data.frame(id = 1:10,
@@ -223,6 +243,7 @@ server = function(input, output, session) {
 }
 shinyApp(ui, server, options = list(height = 725))
 ```
+</center>
 
 ### Asking each node $i$ in $G^{*}$ how many of their neighbors have a given trait $k$  produces a single ***ARD*** response $y_{ik}$.
 
@@ -250,73 +271,61 @@ shinyApp(ui, server, options = list(height = 725))
 
 <br>
 
+<center>
 ```{r, echo = FALSE}
 ARD %>%
   kbl() %>%
   kable_styling(bootstrap_options = c("striped", "hover"), full_width = T)
 ```
+</center>
 
 # 4. Estimating Community Structure using ***ARD***
 
-### Now we can use ***ARD*** responses $Y$ we gathered above to estimate $\hat{P}cc^{\prime}$, the probability of connection between a node in community $Lavender$ and node in community $Pink$.
+### Now we can use ***ARD*** responses $Y$ we gathered above to estimate the probability that a given node is a member of unobserved latent communities <b><i>1</i></b> or <b><i>2</i></b>.
 
 ### Please refer to the [full paper](https://arxiv.org/abs/1908.09881) for further details on how we compute estimates using the ARD data.
 
-### First, we use k-means clustering to classify nodes into communities $\hat{c}$ and $\hat{c}^{\prime}$ based on their ***ARD*** responses $y_{ik}$. 
+### First, we use k-means clustering to classify nodes into unobserved latent communities <b><i>1</i></b> and <b><i>2</i></b> based on their ***ARD*** responses $y_{ik}$. 
 
-### In our example, since ***Triangles*** know mostly other ***Triangles***, they get clustered together while ***Stars*** don't know other ***Stars***, so they are not clustered together. 
+### In our example, since ***Huskies*** know mostly other ***Huskies***, they get clustered together while ***Bulldogs*** don't know other ***Bulldogs***, so they are not clustered together. 
 
+<center>
 ```{r, echo = FALSE,out.width="850.px"}
 
-knitr::include_graphics("communities.PNG")
+knitr::include_graphics("communities_uw.PNG")
 
 ```
+</center>
 
 ### Refer to page seven of our [full paper](https://arxiv.org/abs/1908.09881) for details about our proposed clustering algorithm.
 
-### Once we have assigned nodes to communities $\hat{c}$ and $\hat{c}^{\prime}$, we calculate the fraction of each trait in each community. 
+### Once we have assigned nodes to communities <b><i>1</i></b> and <b><i>2</i></b>, we calculate the fraction of each trait in each community. 
 
-### So in our example we have $\hat{c}$
+### So in our example we have community <b><i>1</i></b> as
 
 <br>
 
+<center>
 ```{r echo = FALSE,out.width="850.px"}
 
-knitr::include_graphics("probability_2.png")
+knitr::include_graphics("probability_2_uw.png")
 
 ```
+</center>
 
 <br>
 
-### and $\hat{c}^{\prime}$
+### and community <b><i>2</i></b> as
 
 <br>
 
+<center>
 ```{r echo = FALSE,out.width="850.px"}
 
-knitr::include_graphics("probability_1.png")
+knitr::include_graphics("probability_1_uw.png")
 
 ```
-
-<br>
-
-### Tabulated percentages:
-
-<br>
-
-```{r, echo = FALSE}
-
-community_fraction = data.frame(C1 = c("20%", "80%", "0%"),
-                                C2 = c("20%", "0%", "80%"))
-names(community_fraction) <- c("$\\hat{c}$", "$\\hat{c}^{\\prime}$")
-rownames(community_fraction) = c("Star", "Triangle", "Square")
-
-community_fraction %>%
-  kbl() %>%
-  kable_styling(bootstrap_options = c("striped", "hover"), 
-                full_width = FALSE,
-                position = "center")
-```
+</center>
 
 <br>
 
@@ -324,13 +333,42 @@ community_fraction %>%
 
 <br>
 
+<center>
 ```{r, echo = FALSE,out.width = "600px"}
 
-knitr::include_graphics("disaggregate.PNG")
+knitr::include_graphics("disaggregate_uw.PNG")
 
 ```
+</center>
 
 <br>
+
+### We now have all the pieces needed to compute our estimate.
+
+<ol>
+  <li>ARD responses (node 4 knows zero Bulldogs, node 8 knows three Cougars, etc.)</li>
+  <li>The conditional Probability of having trait k, given K-means community assignment (80% Huskies in community <b><i>1</i></b>, for example.) </li>
+  <li>The total number of nodes in each K-means community (5 for each)</li>
+</ol>
+
+### For each node (student) $y_i$, and each trait (school mascot) $k$, we multiply their associated ARD response by the conditional probability of having trait $k$ and then dividing that product by the number of nodes in the associated community. 
+
+### Then we take the sum over the traits for each student. 
+
+### Let's walk through the calculation for $y_8$ (node 8). For ARD responses, $y_{8,Bulldog}$ = 0, $y_{8,Husky}$ = 1, and $y_{8,Cougar }$ = 3. 
+
+### The conditional probability of being a ***Bulldog*** given assignment to Community <b><i>2</i></b> is 0.2. Likewise, for ***Huskies*** it is 0, and for ***Cougars*** it is 0.8. 
+
+### And the number of nodes in <b><i>2</i></b> is 5. 
+
+### So for $y_{8,Bulldog}$, we have $\frac{0 \; * \; 0.2}{5} = 0$,
+### plus $y_{8,Husky} = \frac{1 \; * \; 0}{5} = 0$, 
+### plus $y_{8,Cougar} = \frac{3 \; * \; 0.8}{5} = 0.48$
+### which yields a total of 0.48 for $y_8$. 
+
+### We do this for each node. 
+
+$y_{i,Husky} = \frac{1 \; * \; 0}{5} = 0$
 
 ### Let's consider how we compute $\sum_{k} \frac{y_{ik} \; \mathbb{P}(community \; = \; \hat{c}^{\prime} \; | \; trait \; = \; k)}{n\hat{c}^{\prime}}$ for node $y_8$. 
 
@@ -340,7 +378,7 @@ knitr::include_graphics("disaggregate.PNG")
 
 <br>
 
-<center> <font size = 5> $y_{8,Star} = 0, \;\;\;\;\;\;\;\;\;\;\; y_{8,Triangle} = 1, \;\;\;\;\;\;\;\;\;\;\; y_{8,Square} = 3$ <font> </center>
+<center> <font size = 5> $y_{8,Bulldog} = 0, \;\;\;\;\;\;\;\;\;\;\; y_{8,Husky} = 1, \;\;\;\;\;\;\;\;\;\;\; y_{8,Cougar} = 3$ <font> </center>
 
 ### Because there are 5 nodes each in $n\hat{c}$ and $n\hat{c}^{\prime}$ and we surveyed all nodes, 
 
@@ -352,41 +390,43 @@ knitr::include_graphics("disaggregate.PNG")
 
 <br>
 
-<center> <font size = 5> $\mathbb{P}(community \; = \; \hat{c}^{\prime} \; | \; trait \; = \; Star) = 0.2$ <font> </center>
+<center> <font size = 5> $\mathbb{P}(community \; = \; \hat{c}^{\prime} \; | \; trait \; = \; Bulldog) = 0.2$ <font> </center>
 
 <br>
 
-<center> <font size = 5> $\mathbb{P}(community \; = \; \hat{c}^{\prime} \; | \; trait \; = \; Triangle) = 0$ <font> </center>
+<center> <font size = 5> $\mathbb{P}(community \; = \; \hat{c}^{\prime} \; | \; trait \; = \; Husky) = 0$ <font> </center>
 
 <br>
 
-<center> <font size = 5> $\mathbb{P}(community \; = \; \hat{c}^{\prime} \; | \; trait \; = \; Square)  \;\;= 0.8$<font> </center>
+<center> <font size = 5> $\mathbb{P}(community \; = \; \hat{c}^{\prime} \; | \; trait \; = \; Cougar)  \;\;= 0.8$<font> </center>
 
 <br>
 
-### For $i$ = 8 and $k$ = ***Star***,
+### For $i$ = 8 and $k$ = ***Bulldog***,
 
 <br>
 
-<center> <font size = 5> $\frac{y_{8, Star} \; * \; \mathbb{P}(community \; = \; \hat{c}^{\prime} \; | \; trait \; = \; Star)}{n\hat{c}^{\prime}} = \frac{0 \; * \; 0.2}{5} = 0$ <font> </center>
+<center> <font size = 5> $\frac{y_{8, Bulldog} \; * \; \mathbb{P}(community \; = \; \hat{c}^{\prime} \; | \; trait \; = \; Bulldog)}{n\hat{c}^{\prime}} = \frac{0 \; * \; 0.2}{5} = 0$ <font> </center>
 
-### For $i$ = 8 and $k$ = ***Triangle***,
-
-<br>
-
-<center> <font size = 5> $\frac{y_{8, Triangle} \; * \; \mathbb{P}(community \; = \; \hat{c}^{\prime} \; | \; trait \; = \; Triangle)}{n\hat{c}^{\prime}} = \frac{1 \; * \; 0}{5} = 0$ <font> </center>
+### For $i$ = 8 and $k$ = ***Husky***,
 
 <br>
 
-### And for $i$ = 8 and $k$ = ***Square***, 
+<center> <font size = 5> $\frac{y_{8, Husky} \; * \; \mathbb{P}(community \; = \; \hat{c}^{\prime} \; | \; trait \; = \; Husky)}{n\hat{c}^{\prime}} = \frac{1 \; * \; 0}{5} = 0$ <font> </center>
 
 <br>
 
+### And for $i$ = 8 and $k$ = ***Cougar***, 
+
+<br>
+
+<center>
 ```{r, echo = FALSE,out.width = "800px"}
 
 knitr::include_graphics("scaling2.png")
 
 ```
+</center>
 
 <br>
 
@@ -394,7 +434,7 @@ knitr::include_graphics("scaling2.png")
 
 <br>
 
-<center> <font size = 5> $\frac{y_{8, Square} \; * \; \mathbb{P}(community \; = \; \hat{c}^{\prime} \; | \; trait \; = \; Square)}{n\hat{c}^{\prime}} = \frac{3 \; * \; 0.8}{5} = 0.48$ <center/>
+<center> <font size = 5> $\frac{y_{8, Cougar} \; * \; \mathbb{P}(community \; = \; \hat{c}^{\prime} \; | \; trait \; = \; Cougar)}{n\hat{c}^{\prime}} = \frac{3 \; * \; 0.8}{5} = 0.48$ <center/>
 
 <br>
 
@@ -406,10 +446,11 @@ knitr::include_graphics("scaling2.png")
 
 <br>
 
-### Finally, to calculate $\hat{P}cc^{\prime}$, we do the above calculation for each node $i \in \hat{c}$ and sum over the sample size of $\hat{c}$, n$\hat{c}$. 
+### Finally, to calculate $\hat{P}cc^{\prime}$, we do the above calculation for each node $i \in \hat{c}$ and sum over the sample size of <b><i>1</i></b>, n<b><i>1</i></b>. 
 
 <br>
 
+<center>
 ```{r echo=FALSE}
 Y = data.frame(rbind(c(0, 1, 0),
                        c(0, 2, 0),
@@ -421,7 +462,7 @@ Y = data.frame(rbind(c(0, 1, 0),
                        c(0, 1, 3),
                        c(1, 0, 1),
                        c(1, 0, 1)))
-colnames(Y) = c("Star", "Triangle", "Square")
+colnames(Y) = c("Bulldog", "Triangle", "Cougar")
 Y = as.matrix(Y)
 
 hat_c_prime = c(0.2, 0, 0.8)
@@ -445,20 +486,11 @@ results %>%
                 full_width = FALSE,
                 position = "center")
 ```
+</center>
 
 <br>
 
 ### In our toy example, we estimate $\hat{P}cc^{\prime} = \frac{1}{5} \; (0 + 0.20 + 0.16 + 0.04 + 0.48) = 0.176$
-
-```{r echo=FALSE}
-### Fraction of $\hat{c}$ for each trait $k$
-
-### $k$ =  ***Star***
-
-### $k$ = ***Triangle***
-
-### $k$ = ***Square***
-```
 
 <br> 
 
