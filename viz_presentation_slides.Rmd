@@ -342,14 +342,11 @@ knitr::include_graphics("disaggregate_uw.PNG")
 </center>
 
 <br>
+ 
+### We now have all the pieces needed to compute our estimate. 
 
-### We now have all the pieces needed to compute our estimate.
+### Because we know how many people someone knows in each latent community, we can estimate the probability of cross-type links.  
 
-<ol>
-  <li>ARD responses (node 4 knows zero Bulldogs, node 8 knows three Cougars, etc.)</li>
-  <li>The conditional Probability of having trait k, given K-means community assignment (80% Huskies in community <b><i>1</i></b>, for example.) </li>
-  <li>The total number of nodes in each K-means community (5 for each)</li>
-</ol>
 
 <br>
 <br>
