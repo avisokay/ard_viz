@@ -20,14 +20,16 @@ library(shinythemes)
 library(DT)
 library(png)
 library(magick)
+library(rsconnect)
 ```
 
 <br>
 
 # Consistently estimating network statistics using *Aggregated Relational Data* (***ARD***)
-#### Breza, Chandrasekhar, Lubold, McCormick, Pan
+#### Guide by Adam Visokay
+#### Paper by Emily Breza, Arun Chandrasekhar, Shane Lubold, Tyler H. McCormick, Mengjie Pan
 
-#### The full paper can be found [here](https://arxiv.org/abs/1908.09881).
+#### The full paper can be found [here](https://www.pnas.org/doi/full/10.1073/pnas.2207185120).
 
 <br>
 
@@ -347,6 +349,17 @@ knitr::include_graphics("disaggregate_uw.PNG")
 
 ### Because we know how many people someone knows in each latent community, we can estimate the probability of cross-type links.  
 
+### We divide by the size of the latent community used to calculate each estimate and take the sum. In our case the size of each latent community is 5 which gives the following for node 8:
+
+<br>
+
+<center> <font size="5">  $\frac{0}{5} + \space \frac{0}{5} + \space \frac{2.4}{5} \space = 0.48$ </font>  </center>
+
+<br>
+
+### Finally, to compute the final entity, we repeat the above computation for all nodes 1-10 and take the average:
+
+<center> <font size="5">  $P_{cc^{\prime}} = \frac{1}{n}\sum_{i=1}^{n} (y_{ik} \space * \space Pr(community \space | \space trait))$ </font>  </center>
 
 <br>
 <br>
