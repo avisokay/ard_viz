@@ -20,14 +20,16 @@ library(shinythemes)
 library(DT)
 library(png)
 library(magick)
+library(rsconnect)
 ```
 
 <br>
 
 # Consistently estimating network statistics using *Aggregated Relational Data* (***ARD***)
-#### Breza, Chandrasekhar, Lubold, McCormick, Pan
+#### Guide by Adam Visokay
+#### Paper by Emily Breza, Arun Chandrasekhar, Shane Lubold, Tyler H. McCormick, Mengjie Pan
 
-#### The full paper can be found [here](https://arxiv.org/abs/1908.09881).
+#### The full paper can be found [here](https://www.pnas.org/doi/full/10.1073/pnas.2207185120).
 
 <br>
 
@@ -342,170 +344,26 @@ knitr::include_graphics("disaggregate_uw.PNG")
 </center>
 
 <br>
+ 
+### We now have all the pieces needed to compute our estimate. 
 
-### We now have all the pieces needed to compute our estimate.
+### Because we know how many people someone knows in each latent community, we can estimate the probability of cross-type links.  
 
-<ol>
-  <li>ARD responses (node 4 knows zero Bulldogs, node 8 knows three Cougars, etc.)</li>
-  <li>The conditional Probability of having trait k, given K-means community assignment (80% Huskies in community <b><i>1</i></b>, for example.) </li>
-  <li>The total number of nodes in each K-means community (5 for each)</li>
-</ol>
-
-### For each node (student) $y_i$, and each trait (school mascot) $k$, we multiply their associated ARD response by the conditional probability of having trait $k$ and then dividing that product by the number of nodes in the associated community. 
-
-### Then we take the sum over the traits for each student. 
-
-### Let's walk through the calculation for $y_8$ (node 8). For ARD responses, $y_{8,Bulldog}$ = 0, $y_{8,Husky}$ = 1, and $y_{8,Cougar }$ = 3. 
-
-### The conditional probability of being a ***Bulldog*** given assignment to Community <b><i>2</i></b> is 0.2. Likewise, for ***Huskies*** it is 0, and for ***Cougars*** it is 0.8. 
-
-### And the number of nodes in <b><i>2</i></b> is 5. 
-
-### So for $y_{8,Bulldog}$, we have $\frac{0 \; * \; 0.2}{5} = 0$,
-### plus $y_{8,Husky} = \frac{1 \; * \; 0}{5} = 0$, 
-### plus $y_{8,Cougar} = \frac{3 \; * \; 0.8}{5} = 0.48$
-### which yields a total of 0.48 for $y_8$. 
-
-### We do this for each node. 
-
-$y_{i,Husky} = \frac{1 \; * \; 0}{5} = 0$
-
-### Let's consider how we compute $\sum_{k} \frac{y_{ik} \; \mathbb{P}(community \; = \; \hat{c}^{\prime} \; | \; trait \; = \; k)}{n\hat{c}^{\prime}}$ for node $y_8$. 
+### We divide by the size of the latent community used to calculate each estimate and take the sum. In our case the size of each latent community is 5 which gives the following for node 8:
 
 <br>
 
-### Recall that from $Y$, we have the following $y_{ik}'s$
+<center> <font size="5">  $\frac{0}{5} + \space \frac{0}{5} + \space \frac{2.4}{5} \space = 0.48$ </font>  </center>
 
 <br>
 
-<center> <font size = 5> $y_{8,Bulldog} = 0, \;\;\;\;\;\;\;\;\;\;\; y_{8,Husky} = 1, \;\;\;\;\;\;\;\;\;\;\; y_{8,Cougar} = 3$ <font> </center>
+### Finally, to compute the final entity, we repeat the above computation for all nodes 1-10 and take the average:
 
-### Because there are 5 nodes each in $n\hat{c}$ and $n\hat{c}^{\prime}$ and we surveyed all nodes, 
-
-<br>
-
-<center> <font size = 5> $n\hat{c} = 5, \;\;\;\;\;\;\;\;\;\;\; n\hat{c}^{\prime} = 5$ <font> </center>
-
-### From the clustering we have 
+<center> <font size="5">  $P_{cc^{\prime}} = \frac{1}{n}\sum_{i=1}^{n} (y_{ik} \space * \space Pr(community \space | \space trait))$ </font>  </center>
 
 <br>
-
-<center> <font size = 5> $\mathbb{P}(community \; = \; \hat{c}^{\prime} \; | \; trait \; = \; Bulldog) = 0.2$ <font> </center>
-
 <br>
-
-<center> <font size = 5> $\mathbb{P}(community \; = \; \hat{c}^{\prime} \; | \; trait \; = \; Husky) = 0$ <font> </center>
-
 <br>
-
-<center> <font size = 5> $\mathbb{P}(community \; = \; \hat{c}^{\prime} \; | \; trait \; = \; Cougar)  \;\;= 0.8$<font> </center>
-
 <br>
-
-### For $i$ = 8 and $k$ = ***Bulldog***,
-
 <br>
-
-<center> <font size = 5> $\frac{y_{8, Bulldog} \; * \; \mathbb{P}(community \; = \; \hat{c}^{\prime} \; | \; trait \; = \; Bulldog)}{n\hat{c}^{\prime}} = \frac{0 \; * \; 0.2}{5} = 0$ <font> </center>
-
-### For $i$ = 8 and $k$ = ***Husky***,
-
 <br>
-
-<center> <font size = 5> $\frac{y_{8, Husky} \; * \; \mathbb{P}(community \; = \; \hat{c}^{\prime} \; | \; trait \; = \; Husky)}{n\hat{c}^{\prime}} = \frac{1 \; * \; 0}{5} = 0$ <font> </center>
-
-<br>
-
-### And for $i$ = 8 and $k$ = ***Cougar***, 
-
-<br>
-
-<center>
-```{r, echo = FALSE,out.width = "800px"}
-
-knitr::include_graphics("scaling2.png")
-
-```
-</center>
-
-<br>
-
-### dividing by $n\hat{c}^{\prime} = 5$ gives
-
-<br>
-
-<center> <font size = 5> $\frac{y_{8, Cougar} \; * \; \mathbb{P}(community \; = \; \hat{c}^{\prime} \; | \; trait \; = \; Cougar)}{n\hat{c}^{\prime}} = \frac{3 \; * \; 0.8}{5} = 0.48$ <center/>
-
-<br>
-
-### Then we take the sum of each computed $\frac{y_{ik} \; \mathbb{P}(community \; = \; \hat{c}^{\prime} \; | \; trait \; = \; k)}{n\hat{c}^{\prime}}$ for each trait $k$. 
-
-<br>
-
-### So for $y_8$, $\sum_{k} \frac{y_{8k} \; \mathbb{P}(community \; = \; \hat{c}^{\prime} \; | \; trait \; = \; k)}{n\hat{c}^{\prime}} = 0 + 0 + 0.48 = 0.48$
-
-<br>
-
-### Finally, to calculate $\hat{P}cc^{\prime}$, we do the above calculation for each node $i \in \hat{c}$ and sum over the sample size of <b><i>1</i></b>, n<b><i>1</i></b>. 
-
-<br>
-
-<center>
-```{r echo=FALSE}
-Y = data.frame(rbind(c(0, 1, 0),
-                       c(0, 2, 0),
-                       c(1, 2, 1),
-                       c(0, 2, 1),
-                       c(0, 2, 1),
-                       c(1, 2, 0),
-                       c(1, 0, 1),
-                       c(0, 1, 3),
-                       c(1, 0, 1),
-                       c(1, 0, 1)))
-colnames(Y) = c("Bulldog", "Triangle", "Cougar")
-Y = as.matrix(Y)
-
-hat_c_prime = c(0.2, 0, 0.8)
-
-result = Y%*%hat_c_prime
-result_scaled = result/5
-
-results = data.frame(Node = c(2,3,4,6,8),
-                     Probability = c(result_scaled[2],
-                                     result_scaled[3],
-                                     result_scaled[4],
-                                     result_scaled[6],
-                                     result_scaled[8])
-                     )
-
-names(results) = c("$i \\in \\hat{c}$", "$Probability$")
-
-results %>%
-  kbl() %>%
-  kable_styling(bootstrap_options = c("striped", "hover"), 
-                full_width = FALSE,
-                position = "center")
-```
-</center>
-
-<br>
-
-### In our toy example, we estimate $\hat{P}cc^{\prime} = \frac{1}{5} \; (0 + 0.20 + 0.16 + 0.04 + 0.48) = 0.176$
-
-<br> 
-
-<br>
-
-<br>
-
-<br>
-
-<br>
-
-<br>
-
-<br>
-
-
-
-
